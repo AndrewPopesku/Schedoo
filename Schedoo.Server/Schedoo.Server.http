@@ -1,7 +1,7 @@
 @Schedoo.Server_HostAddress = http://localhost:5153
 @RefServer_Address = http://fmi-schedule.chnu.edu.ua
 
-GET {{Schedoo.Server_HostAddress}}/weatherforecast/
+GET {{Schedoo.Server_HostAddress}}/groupschedule
 Accept: application/json
 
 ###
