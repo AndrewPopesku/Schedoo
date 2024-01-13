@@ -1,6 +1,9 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using System.Text.RegularExpressions;
+using Schedoo.Server.Helpers;
+using Schedoo.Server.Models;
+using System.Globalization;
+using MGroup = Schedoo.Server.Models.Group;
 
 namespace Schedoo.Server.Services
 {
@@ -14,15 +17,12 @@ namespace Schedoo.Server.Services
             _webDriver = new ChromeDriver(options);
         }
 
-        public async Task<ScheduleWrapper> GetGroupSchedule()
+        public ScheduleWrapper GetGroupSchedule()
         {
-            SortedSet<TimeSlot> timeSlots = new SortedSet<TimeSlot>();
-            List<string> days = new List<string>();
-
             _webDriver.Navigate().GoToUrl($"http://fmi-schedule.chnu.edu.ua/schedule?semester=55&group=40");
             Thread.Sleep(1000);
 
-            string groupName = _webDriver.FindElement(By.XPath("//*[@id=\"root\"]/div/section/section/div[1]/form/div[2]/div/div/div/input")).GetAttribute("value");
+            var groupName = _webDriver.FindElement(By.XPath("//*[@id=\"root\"]/div/section/section/div[1]/form/div[2]/div/div/div/input")).GetAttribute("value");
             var weekTables = _webDriver.FindElements(By.ClassName("MuiTable-root"));
             var oddWeekClasses = ParseTableDataToSchedules(weekTables[0], groupName);
             var evenWeekClasses = ParseTableDataToSchedules(weekTables[1], groupName);
@@ -37,38 +37,38 @@ namespace Schedoo.Server.Services
 
         private SortedSet<TimeSlot> GetTimeSlots(IWebElement weekElement)
         {
-            var timeSlots = new SortedSet<TimeSlot>();
+            var resultingTimeSlots = new SortedSet<TimeSlot>();
 
             var timeSlotElements = weekElement.FindElements(By.CssSelector(".MuiTableCell-root.MuiTableCell-body.lesson.groupLabelCell"));
             foreach (var timeSlotElement in timeSlotElements)
             {
-                var timeSlotDetails = (timeSlotElement as WebElement).ComputedAccessibleLabel.Split();
-                var timeSlot = new TimeSlot()
+                if (timeSlotElement is WebElement timeSlotWebElement)
                 {
-                    Id = Int32.Parse(timeSlotDetails[0]),
-                    ClassName = timeSlotDetails[0],
-                    StartTime = TimeSpan.Parse(timeSlotDetails[1]),
-                    EndTime = TimeSpan.Parse(timeSlotDetails[3]),
-                };
+                    var timeSlotDetails = timeSlotWebElement.ComputedAccessibleLabel.Split();
+                    var timeSlot = new TimeSlot
+                    {
+                        Id = int.Parse(timeSlotDetails[0]),
+                        ClassName = timeSlotDetails[0],
+                        StartTime = TimeSpan.Parse(timeSlotDetails[1], CultureInfo.InvariantCulture),
+                        EndTime = TimeSpan.Parse(timeSlotDetails[3], CultureInfo.InvariantCulture),
+                    };
 
-                timeSlots.Add(timeSlot);
+                    resultingTimeSlots.Add(timeSlot);
+                }
+
             }
 
-            return timeSlots;
+            return resultingTimeSlots;
         }
 
         private List<string> GetDaysOfWeek(IWebElement weekElement)
         {
-            var days = new List<string>();
-
             var dayElements = weekElement.FindElements(By.XPath("//thead/tr/th"));
-            foreach (var day in dayElements)
-            {
-                if (!string.IsNullOrEmpty(day.Text) && !days.Contains(day.Text))
-                {
-                    days.Add(day.Text);
-                }
-            }
+
+            var days = dayElements.Where(day => !string.IsNullOrEmpty(day.Text))
+                                  .Select(day => day.Text)
+                                  .Distinct()
+                                  .ToList();
 
             return days;
         }
@@ -80,42 +80,36 @@ namespace Schedoo.Server.Services
             var weekTable = weekElement.FindElements(By.XPath(".//tr"));
             foreach (var rows in weekTable)
             {
-                var rowsData = rows.FindElements(By.XPath(".//td"));
-                if (rowsData.Any())
+                var rowData = rows.FindElements(By.XPath(".//td"));
+
+                if (rowData.Any() && rowData[0] is WebElement rowDataWebEl)
                 {
-                    var timeSlotDetails = (rowsData.First() as WebElement).ComputedAccessibleLabel.Split();
+                    var timeSlotDetails = rowDataWebEl.ComputedAccessibleLabel.Split();
                     var timeSlot = new TimeSlot()
                     {
                         Id = Int32.Parse(timeSlotDetails[0]),
                         ClassName = timeSlotDetails[0],
-                        StartTime = TimeSpan.Parse(timeSlotDetails[1]),
-                        EndTime = TimeSpan.Parse(timeSlotDetails[3]),
+                        StartTime = TimeSpan.Parse(timeSlotDetails[1], CultureInfo.InvariantCulture),
+                        EndTime = TimeSpan.Parse(timeSlotDetails[3], CultureInfo.InvariantCulture),
                     };
 
-                    for (int i = 1; i < rowsData.Count; i++)
-                    {
-                        if (string.IsNullOrEmpty(rowsData[i].Text))
-                        {
-                            continue;
-                        }
-
-                        var schedule = ParseScheduleFromWebElement(rowsData[i], timeSlot);
-                        schedule.Group = new Group() { Title = groupName };
-                        resultSchedules.Add(schedule);
-                    }
+                    resultSchedules.AddRange(
+                        rowData.Where(d => !string.IsNullOrEmpty(d.Text))
+                            .Select(d => ParseScheduleFromWebElement(d, timeSlot, groupName))
+                    );
                 }
             }
 
             return resultSchedules;
         }
 
-        private Schedule ParseScheduleFromWebElement(IWebElement rowData, TimeSlot timeSlot)
+        private Schedule ParseScheduleFromWebElement(IWebElement rowData, TimeSlot timeSlot, string groupName)
         {
             var day = rowData.FindElement(By.XPath("./p")).GetAttribute("title");
             var cellData = rowData.Text.Split("\r\n");
 
             var teacherData = cellData[0].Split();
-            var teacher = new Teacher()
+            var teacher = new Teacher
             {
                 Position = teacherData[0],
                 Surname = teacherData[1],
@@ -123,24 +117,30 @@ namespace Schedoo.Server.Services
                 Patronymic = teacherData[3],
             };
 
-            var classInfo = cellData[2].Substring(1, cellData[2].Length - 2).Split(',');
-            var formatedClassInfo = classInfo.Select(p => p.Trim()).ToList();
-            var @class = new Class()
+            var classInfo = cellData[2].Substring(1, cellData[2].Length - 2)
+                                       .Split(',')
+                                       .Select(p => p.Trim())
+                                       .ToList();
+
+            var @class = new Class
             {
                 Name = cellData[1],
                 Teacher = teacher,
-                LessonType = formatedClassInfo[0],
-                Room = new Room() { Name = formatedClassInfo[1] },
+                LessonType = classInfo[0],
+                Room = new Room { Name = classInfo[1] },
             };
-            var schedule = new Schedule()
+
+            var schedule = new Schedule
             {
                 TimeSlot = timeSlot,
                 Class = @class,
                 WeekType = "Odd",
                 DayOfWeek = day,
+                Group = new MGroup { Title = groupName },
             };
 
             return schedule;
         }
+
     }
 }
