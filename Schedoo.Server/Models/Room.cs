@@ -1,4 +1,4 @@
-﻿namespace Schedoo.Services.APIFetcher.Models;
+﻿namespace Schedoo.Server.Models;
 
 public class Room
 {

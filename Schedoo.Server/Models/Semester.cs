@@ -1,4 +1,4 @@
-﻿namespace Schedoo.Server.Services.Models;
+﻿namespace Schedoo.Server.Models;
 public class Semester
 {
     public int Id { get; set; }
