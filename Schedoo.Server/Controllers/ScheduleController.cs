@@ -1,12 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Schedoo.Server.Services;
 
 namespace Schedoo.Server.Controllers
 {
     public class ScheduleController : Controller
     {
-        public IActionResult Index()
+        [HttpGet("groupschedule")]
+        public ActionResult GetGroups()
         {
-            return View();
+            var scrapper = new ScrapperService();
+            var res = scrapper.GetGroupSchedule();
+
+
+            return Ok(res);
         }
     }
 }
