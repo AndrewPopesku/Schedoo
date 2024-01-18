@@ -6,5 +6,12 @@ Accept: application/json
 
 ###
 
+GET {{Schedoo.Server_HostAddress}}/getgroups
+Accept: application/json
+
+###
+
+
+### API Test
 GET {{RefServer_Address}}/public/semesters
 Accept: application/json

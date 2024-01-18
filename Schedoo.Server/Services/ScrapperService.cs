@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 using Schedoo.Server.Helpers;
 using Schedoo.Server.Models;
 using System.Globalization;
@@ -10,6 +11,7 @@ namespace Schedoo.Server.Services
     public class ScrapperService
     {
         private readonly IWebDriver _webDriver;
+
         public ScrapperService()
         {
             ChromeOptions options = new ChromeOptions();
@@ -33,6 +35,80 @@ namespace Schedoo.Server.Services
                 TimeSlots = GetTimeSlots(weekTables[0]),
                 Days = GetDaysOfWeek(weekTables[0]),
             };
+        }
+
+        public List<MGroup> GetGroups()
+        {
+            var resGroups = new List<MGroup>();
+
+            _webDriver.Navigate().GoToUrl("http://fmi-schedule.chnu.edu.ua/schedule?semester=55");
+            Thread.Sleep(2000);
+
+            _webDriver.FindElement(By.CssSelector(".MuiAutocomplete-root:nth-child(2) .MuiButtonBase-root:nth-child(2) .MuiSvgIcon-root"))
+                .Click();
+            WebDriverWait wait = new WebDriverWait(_webDriver, TimeSpan.FromSeconds(10));
+            IWebElement? autocompleteDropdown = wait.Until(d =>
+            {
+                try
+                {
+                    IWebElement element = d.FindElement(By.XPath("/html/body/div[4]/div/ul"));
+                    return element.Displayed ? element : null;
+                }
+                catch (StaleElementReferenceException)
+                {
+                    return null;
+                }
+                catch (NoSuchElementException)
+                {
+                    return null;
+                }
+            });
+            
+            Thread.Sleep(2000);
+            if (autocompleteDropdown != null)
+            {
+                var groupWebElements = autocompleteDropdown.FindElements(By.CssSelector(".MuiAutocomplete-option"));
+                resGroups = groupWebElements.Select(g => new MGroup { Title = g.Text }).ToList();
+            }
+
+            return resGroups;
+        }
+
+        public List<Semester> GetSemesters()
+        {
+            var resSemesters = new List<Semester>();
+
+            _webDriver.Navigate().GoToUrl("http://fmi-schedule.chnu.edu.ua/");
+            Thread.Sleep(2000);
+
+            _webDriver.FindElement(By.CssSelector(".MuiAutocomplete-root:nth-child(1) .MuiButtonBase-root:nth-child(2) .MuiSvgIcon-root")).Click();
+
+            WebDriverWait wait = new WebDriverWait(_webDriver, TimeSpan.FromSeconds(10));
+            IWebElement? autocompleteDropdown = wait.Until(d =>
+            {
+                try
+                {
+                    IWebElement element = d.FindElement(By.XPath("/html/body/div[4]/div/ul"));
+                    return element.Displayed ? element : null;
+                }
+                catch (StaleElementReferenceException)
+                {
+                    return null;
+                }
+                catch (NoSuchElementException)
+                {
+                    return null;
+                }
+            });
+
+            Thread.Sleep(2000);
+            if (autocompleteDropdown != null)
+            {
+                var semesterWebElements = autocompleteDropdown.FindElements(By.CssSelector(".MuiAutocomplete-option"));
+                resSemesters = semesterWebElements.Select(s => new Semester { Description = s.Text }).ToList();
+            }
+
+            return resSemesters;
         }
 
         private SortedSet<TimeSlot> GetTimeSlots(IWebElement weekElement)
@@ -94,8 +170,9 @@ namespace Schedoo.Server.Services
                     };
 
                     resultSchedules.AddRange(
-                        rowData.Where(d => !string.IsNullOrEmpty(d.Text))
-                            .Select(d => ParseScheduleFromWebElement(d, timeSlot, groupName))
+                        rowData.Skip(1)
+                               .Where(d => !string.IsNullOrEmpty(d.Text))
+                               .Select(d => ParseScheduleFromWebElement(d, timeSlot, groupName))
                     );
                 }
             }
@@ -106,6 +183,8 @@ namespace Schedoo.Server.Services
         private Schedule ParseScheduleFromWebElement(IWebElement rowData, TimeSlot timeSlot, string groupName)
         {
             var day = rowData.FindElement(By.XPath("./p")).GetAttribute("title");
+            var linkToMeeting = rowData.FindElement(By.XPath("//title")).Text;
+
             var cellData = rowData.Text.Split("\r\n");
 
             var teacherData = cellData[0].Split();
@@ -127,11 +206,14 @@ namespace Schedoo.Server.Services
                 Name = cellData[1],
                 Teacher = teacher,
                 LessonType = classInfo[0],
+                LinkToMeeting = linkToMeeting,
                 Room = new Room { Name = classInfo[1] },
             };
 
             var schedule = new Schedule
             {
+                ClassId = @class.Id,
+                TimeSlotId = timeSlot.Id,
                 TimeSlot = timeSlot,
                 Class = @class,
                 WeekType = "Odd",
@@ -141,6 +223,5 @@ namespace Schedoo.Server.Services
 
             return schedule;
         }
-
     }
 }

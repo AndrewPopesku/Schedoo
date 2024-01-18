@@ -3,8 +3,6 @@
 public class TimeSlot : IComparable<TimeSlot>
 {
     public int Id { get; set; }
-    public int StartTimeId { get; set; }
-    public int EndTimeId { get; set; }
     public string ClassName { get; set; }
     
     public TimeSpan StartTime { get; set; }

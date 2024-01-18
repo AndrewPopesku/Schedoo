@@ -5,14 +5,34 @@ namespace Schedoo.Server.Controllers
 {
     public class ScheduleController : Controller
     {
-        [HttpGet("groupschedule")]
-        public ActionResult GetGroups()
+        private ScrapperService scrapperService;
+        public ScheduleController()
         {
-            var scrapper = new ScrapperService();
-            var res = scrapper.GetGroupSchedule();
+            scrapperService = new ScrapperService();
+        }
 
+        [HttpGet("groupschedule")]
+        public ActionResult GetGroupSchedule()
+        {
+            var res = scrapperService.GetGroupSchedule();
 
             return Ok(res);
+        }
+
+        [HttpGet("getgroups")]
+        public ActionResult GetGroups()
+        {
+            var groups = scrapperService.GetGroups();
+
+            return Ok(groups);
+        }
+
+        [HttpGet("getsemesters")]
+        public ActionResult GetSemesters()
+        {
+            var semesters = scrapperService.GetSemesters();
+
+            return Ok(semesters);
         }
     }
 }
