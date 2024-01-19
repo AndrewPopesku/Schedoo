@@ -1,4 +1,5 @@
 ﻿using Schedoo.Server.Models;
+using System.Collections.Immutable;
 
 namespace Schedoo.Server.Helpers
 {
@@ -6,10 +7,10 @@ namespace Schedoo.Server.Helpers
     {
         public class ScheduleCat
         {
-            public List<Schedule> OddWeekClasses { get; set; }
-            public List<Schedule> EvenWeekClasses { get; set; }
+            public IEnumerable<Schedule> OddWeekClasses { get; set; }
+            public IEnumerable<Schedule> EvenWeekClasses { get; set; }
 
-            public ScheduleCat(List<Schedule> oddWeekClasses, List<Schedule> evenWeekClasses)
+            public ScheduleCat(IEnumerable<Schedule> oddWeekClasses, IEnumerable<Schedule> evenWeekClasses)
             {
                 OddWeekClasses = oddWeekClasses;
                 EvenWeekClasses = evenWeekClasses;
@@ -17,7 +18,7 @@ namespace Schedoo.Server.Helpers
         }
 
         public ScheduleCat ScheduleAll { get; set; }
-        public List<string> Days { get; set; }
-        public SortedSet<TimeSlot> TimeSlots { get; set; }
+        public IEnumerable<string> Days { get; set; }
+        public ImmutableSortedSet<TimeSlot> TimeSlots { get; set; }
     }
 }
