@@ -1,7 +1,12 @@
-﻿namespace Schedoo.Server.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace Schedoo.Server.Models;
 
 public class TimeSlot : IComparable<TimeSlot>
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public int Id { get; set; }
     public string ClassName { get; set; }
     
