@@ -4,7 +4,6 @@ using OpenQA.Selenium.Support.UI;
 using Schedoo.Server.Helpers;
 using Schedoo.Server.Models;
 using System.Globalization;
-using MGroup = Schedoo.Server.Models.Group;
 
 namespace Schedoo.Server.Services
 {
@@ -19,27 +18,22 @@ namespace Schedoo.Server.Services
             _webDriver = new ChromeDriver(options);
         }
 
-        public ScheduleWrapper GetGroupSchedule()
+        public IEnumerable<Schedule> GetGroupSchedule()
         {
             _webDriver.Navigate().GoToUrl($"http://fmi-schedule.chnu.edu.ua/schedule?semester=55&group=40");
             Thread.Sleep(1000);
 
             var groupName = _webDriver.FindElement(By.XPath("//*[@id=\"root\"]/div/section/section/div[1]/form/div[2]/div/div/div/input")).GetAttribute("value");
             var weekTables = _webDriver.FindElements(By.ClassName("MuiTable-root"));
-            var oddWeekClasses = ParseTableDataToSchedules(weekTables[0], groupName);
-            var evenWeekClasses = ParseTableDataToSchedules(weekTables[1], groupName);
+            var oddWeekClasses = ParseTableDataToSchedules(weekTables[0], "odd", groupName);
+            var evenWeekClasses = ParseTableDataToSchedules(weekTables[1], "even", groupName);
 
-            return new ScheduleWrapper()
-            {
-                ScheduleAll = new ScheduleWrapper.ScheduleCat(oddWeekClasses, evenWeekClasses),
-                TimeSlots = GetTimeSlots(weekTables[0]),
-                Days = GetDaysOfWeek(weekTables[0]),
-            };
+            return oddWeekClasses.Concat(evenWeekClasses);
         }
 
-        public List<MGroup> GetGroups()
+        public List<string> GetGroups()
         {
-            var resGroups = new List<MGroup>();
+            var resGroups = new List<string>();
 
             _webDriver.Navigate().GoToUrl("http://fmi-schedule.chnu.edu.ua/schedule?semester=55");
             Thread.Sleep(2000);
@@ -68,7 +62,7 @@ namespace Schedoo.Server.Services
             if (autocompleteDropdown != null)
             {
                 var groupWebElements = autocompleteDropdown.FindElements(By.CssSelector(".MuiAutocomplete-option"));
-                resGroups = groupWebElements.Select(g => new MGroup { Title = g.Text }).ToList();
+                resGroups = groupWebElements.Select(g => g.Text).ToList();
             }
 
             return resGroups;
@@ -111,32 +105,6 @@ namespace Schedoo.Server.Services
             return resSemesters;
         }
 
-        private SortedSet<TimeSlot> GetTimeSlots(IWebElement weekElement)
-        {
-            var resultingTimeSlots = new SortedSet<TimeSlot>();
-
-            var timeSlotElements = weekElement.FindElements(By.CssSelector(".MuiTableCell-root.MuiTableCell-body.lesson.groupLabelCell"));
-            foreach (var timeSlotElement in timeSlotElements)
-            {
-                if (timeSlotElement is WebElement timeSlotWebElement)
-                {
-                    var timeSlotDetails = timeSlotWebElement.ComputedAccessibleLabel.Split();
-                    var timeSlot = new TimeSlot
-                    {
-                        Id = int.Parse(timeSlotDetails[0]),
-                        ClassName = timeSlotDetails[0],
-                        StartTime = TimeSpan.Parse(timeSlotDetails[1], CultureInfo.InvariantCulture),
-                        EndTime = TimeSpan.Parse(timeSlotDetails[3], CultureInfo.InvariantCulture),
-                    };
-
-                    resultingTimeSlots.Add(timeSlot);
-                }
-
-            }
-
-            return resultingTimeSlots;
-        }
-
         private List<string> GetDaysOfWeek(IWebElement weekElement)
         {
             var dayElements = weekElement.FindElements(By.XPath("//thead/tr/th"));
@@ -149,7 +117,7 @@ namespace Schedoo.Server.Services
             return days;
         }
 
-        private List<Schedule> ParseTableDataToSchedules(IWebElement weekElement, string groupName)
+        private List<Schedule> ParseTableDataToSchedules(IWebElement weekElement, string weekType, string groupName)
         {
             var resultSchedules = new List<Schedule>();
 
@@ -165,14 +133,14 @@ namespace Schedoo.Server.Services
                     {
                         Id = Int32.Parse(timeSlotDetails[0]),
                         ClassName = timeSlotDetails[0],
-                        StartTime = TimeSpan.Parse(timeSlotDetails[1], CultureInfo.InvariantCulture),
-                        EndTime = TimeSpan.Parse(timeSlotDetails[3], CultureInfo.InvariantCulture),
+                        StartTime = TimeSpan.Parse(timeSlotDetails[1]),
+                        EndTime = TimeSpan.Parse(timeSlotDetails[3]),
                     };
 
                     resultSchedules.AddRange(
                         rowData.Skip(1)
                                .Where(d => !string.IsNullOrEmpty(d.Text))
-                               .Select(d => ParseScheduleFromWebElement(d, timeSlot, groupName))
+                               .Select(d => ParseScheduleFromWebElement(d, timeSlot, weekType, groupName))
                     );
                 }
             }
@@ -180,7 +148,7 @@ namespace Schedoo.Server.Services
             return resultSchedules;
         }
 
-        private Schedule ParseScheduleFromWebElement(IWebElement rowData, TimeSlot timeSlot, string groupName)
+        private Schedule ParseScheduleFromWebElement(IWebElement rowData, TimeSlot timeSlot, string weekType, string groupName)
         {
             var day = rowData.FindElement(By.XPath("./p")).GetAttribute("title");
             var linkToMeeting = rowData.FindElement(By.XPath("//title")).Text;
@@ -188,8 +156,11 @@ namespace Schedoo.Server.Services
             var cellData = rowData.Text.Split("\r\n");
 
             var teacherData = cellData[0].Split();
+
+            var teacherId = Guid.NewGuid();
             var teacher = new Teacher
             {
+                Id = teacherId,
                 Position = teacherData[0],
                 Surname = teacherData[1],
                 Name = teacherData[2],
@@ -201,13 +172,17 @@ namespace Schedoo.Server.Services
                                        .Select(p => p.Trim())
                                        .ToList();
 
+            var roomId = Guid.NewGuid();
             var @class = new Class
             {
+                Id = Guid.NewGuid(),
                 Name = cellData[1],
                 Teacher = teacher,
+                TeacherId = teacherId,
                 LessonType = classInfo[0],
                 LinkToMeeting = linkToMeeting,
-                Room = new Room { Name = classInfo[1] },
+                Room = new Room { Id = roomId, Name = classInfo[1] },
+                RoomId = roomId,
             };
 
             var schedule = new Schedule
@@ -216,9 +191,9 @@ namespace Schedoo.Server.Services
                 TimeSlotId = timeSlot.Id,
                 TimeSlot = timeSlot,
                 Class = @class,
-                WeekType = "Odd",
+                WeekType = weekType,
                 DayOfWeek = day,
-                Group = new MGroup { Title = groupName },
+                GroupId = groupName,
             };
 
             return schedule;
