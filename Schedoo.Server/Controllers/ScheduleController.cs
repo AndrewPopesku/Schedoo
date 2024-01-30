@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Schedoo.Server.Data;
 using Schedoo.Server.Helpers;
@@ -8,34 +9,48 @@ using System.Collections.Immutable;
 
 namespace Schedoo.Server.Controllers
 {
-    public class ScheduleController : Controller
+    [ApiController]
+    [Route("[controller]")]
+    public class ScheduleController(SchedooContext schedooContext, ScrapperService scrapperService)
+        : ControllerBase
     {
-        private readonly SchedooContext _schedooContext;
-        private readonly ScrapperService _scrapperService;
-        public ScheduleController(SchedooContext schedooContext, ScrapperService scrapperService)
-        {
-            _schedooContext = schedooContext;
-            _scrapperService = scrapperService;
-        }
-
         [HttpGet("groupschedule")]
-        public async Task<ActionResult> GetGroupSchedule()
+        public async Task<IActionResult> GetGroupSchedule()
         {
-            var scheduleDb = _schedooContext.Schedules
+            var scheduleDb = schedooContext.Schedules
                              .Include(s => s.TimeSlot)
                              .Include(s => s.Class);
+            var (startWeekDate, endWeekDate) = Extensions.GetMondayAndFriday();
 
             if (!scheduleDb.Any())
             {
-                var scheduleScrapped = _scrapperService.GetGroupSchedule();
+                var scheduleScrapped = scrapperService.GetGroupSchedule();
                 var timeslots = scheduleScrapped.Select(s => s.TimeSlot).Distinct();
                 var classes = scheduleScrapped.Select(s => s.Class).Distinct();
                 var scheduleToDb = scheduleScrapped.Select(s => new Schedule(s));
 
-                await _schedooContext.AddRangeAsync(classes);
-                await _schedooContext.AddRangeAsync(timeslots);
-                await _schedooContext.AddRangeAsync(scheduleToDb);
-                await _schedooContext.SaveChangesAsync();
+                await schedooContext.AddRangeAsync(classes);
+                await schedooContext.AddRangeAsync(timeslots);
+                await schedooContext.AddRangeAsync(scheduleToDb);
+                await schedooContext.SaveChangesAsync();
+            }
+
+            if (!schedooContext.ScheduleDates
+                .Any(sd => sd.Date >= startWeekDate && sd.Date <= endWeekDate))
+            {
+                var scheduleDbIterable = scheduleDb.Where(s => s.WeekType == "odd");
+                foreach (var s in scheduleDbIterable)
+                {
+                    var newScheduleDate = new ScheduleDate
+                    {
+                        ScheduleId = s.Id,
+                        Date = Extensions.GetDateOfWeekDay(s.DayOfWeek)
+                    };
+
+                    schedooContext.ScheduleDates.Add(newScheduleDate);
+                }
+
+                await schedooContext.SaveChangesAsync();
             }
 
             var result = new ScheduleWrapper()
@@ -44,23 +59,24 @@ namespace Schedoo.Server.Controllers
                     scheduleDb.Where(s => s.WeekType == "odd"),
                     scheduleDb.Where(s => s.WeekType == "even")
                 ),
-                TimeSlots = _schedooContext.TimeSlots.ToImmutableSortedSet(),
+                TimeSlots = schedooContext.TimeSlots.ToImmutableSortedSet(),
                 Days = scheduleDb.Select(s => s.DayOfWeek).Distinct(),
             };
 
             return Ok(result);
         }
 
+        
         [HttpGet("getgroups")]
-        public ActionResult GetGroups()
+        public IActionResult GetGroups()
         {
-            return Ok(_scrapperService.GetGroups());
+            return Ok(scrapperService.GetGroups());
         }
 
         [HttpGet("getsemesters")]
-        public ActionResult GetSemesters()
+        public IActionResult GetSemesters()
         {
-            var semesters = _scrapperService.GetSemesters();
+            var semesters = scrapperService.GetSemesters();
 
             return Ok(semesters);
         }

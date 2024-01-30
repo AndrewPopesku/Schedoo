@@ -16,5 +16,6 @@ namespace Schedoo.Server.Data
         public DbSet<Semester> Semesters { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<TimeSlot> TimeSlots { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
     }
 }
