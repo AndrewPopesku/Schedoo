@@ -1,0 +1,159 @@
+:root {
+    --grey: #656565;
+    font-size: 15px;
+}
+
+.App {
+    text-align: center;
+    color: #000;
+    font-family: 'Roboto', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.timeslot-cell div {
+    padding: 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 5em;
+}
+
+.timeslot-cell {
+    border: none;
+    width: 50px;
+}
+
+.line {
+    border-left: 0.11em solid var(--grey);
+    margin: 0 0.7em;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 2em 1em;
+}
+
+td {
+    border: 1px solid var(--grey);
+    border-radius: 5px;
+    height: 7.5em;
+    width: 11.875em;
+}
+
+.active-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.class-header {
+    margin-bottom: 10px;
+}
+
+p,
+i,
+strong {
+    padding: 0;
+    margin: 0;
+}
+
+.class-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.class-content {
+    padding: 5px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.class-title {
+    font-weight: 500;
+}
+
+.class-room {
+    font-weight: 500;
+}
+
+.active-card {
+    background: var(--grey);
+    color: white;
+}
+
+.class-info {
+    font-size: 0.9em;
+}
+
+.filters {
+    margin: 2em 0 0.5em 7.2em;
+    display: flex;
+    width: 35em;
+    justify-content: space-between;
+}
+
+.blinking-dot {
+    font-size: 0em;
+    animation: blinking 3s infinite;
+}
+
+@keyframes blinking {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+
+/* Extra small devices (phones) */
+@media (max-width: 575.98px) {
+    table {
+        border-spacing: 1em 0.5em;
+        font-size: 0.7em;
+    }
+}
+
+/* Small devices (tablets) */
+@media (min-width: 576px) and (max-width: 785px) {
+    table {
+        border-spacing: 1em 0.5em;
+        font-size: 0.8em;
+    }
+}
+
+/* Medium devices (desktops) */
+@media (min-width: 785px) and (max-width: 991.98px) {
+    table {
+        border-spacing: 1.2em 0.7em;
+        font-size: 0.9em;
+    }
+}
+
+/* Large devices (large desktops) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    table {
+        border-spacing: 1.5em 0.9em;
+    }
+}
+
+/* Extra large devices (extra large desktops) */
+@media (min-width: 1200px) {
+    td {
+        border: 1px solid var(--grey);
+        border-radius: 5px;
+        height: 7.5em;
+        width: 13em;
+    }
+}
