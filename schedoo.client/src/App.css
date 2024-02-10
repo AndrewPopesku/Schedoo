@@ -1,19 +1,30 @@
-﻿#root {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
+﻿:root {
+    --grey: #656565;
+    font-size: 15px;
 }
 
-tr:nth-child(even) {
-    background: #F2F2F2;
+body {
+    color: #000;
+    font-family: 'Segoe UI', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
 }
 
-tr:nth-child(odd) {
-    background: #FFF;
+a {
+    color: #0366d6;
 }
 
-th, td {
-    padding-left: 1rem;
-    padding-right: 1rem;
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+code {
+    color: #E01A76;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
 }

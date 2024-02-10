@@ -36,6 +36,21 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
     }
 }
 
+const customEndpoints = {
+    '^/groupschedule': {
+        target: 'https://localhost:7122/Schedule',
+        secure: false,
+    },
+    '^/getgroups': {
+        target: 'https://localhost:7122/Schedule',
+        secure: false,
+    },
+    '^/getsemesters': {
+        target: 'https://localhost:7122/Schedule',
+        secure: false,
+    },
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [plugin()],
@@ -49,7 +64,8 @@ export default defineConfig({
             '^/weatherforecast': {
                 target: 'https://localhost:7122/',
                 secure: false
-            }
+            },
+            ...customEndpoints
         },
         port: 5173,
         https: {

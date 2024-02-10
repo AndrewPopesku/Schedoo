@@ -31,9 +31,32 @@ public static class Extensions
         DateTime currentDate = DateTime.Today;
         DayOfWeek currentDayOfWeek = currentDate.DayOfWeek;
 
-        int daysToTargetDay = ((int)targetDayOfWeek - (int)currentDayOfWeek + 7) % 7;
+        int daysToTargetDay = (int)targetDayOfWeek - (int)currentDayOfWeek;
         DateTime targetDate = currentDate.AddDays(daysToTargetDay);
 
         return targetDate;
+    }
+    
+    public static DateTime GetDateOfWeekDay(DayOfWeek dayOfWeek)
+    {
+        DateTime today = DateTime.Today;
+        int daysUntilTarget = (int)dayOfWeek - (int)today.DayOfWeek;
+
+        // If today is the target day, return today; otherwise, return the next occurrence.
+        return today.AddDays(daysUntilTarget);
+    }
+
+    public static WeekType ToWeekType(this string weekTypeStr)
+    {
+        var weekType = (WeekType)Enum.Parse(typeof(WeekType), weekTypeStr, true);
+
+        return weekType;
+    }
+
+    public static DayOfWeek ToDayOfWeek(this string dayOfWeekStr)
+    {
+        var dayOfWeek = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), dayOfWeekStr, true);
+
+        return dayOfWeek;
     }
 }
