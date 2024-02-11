@@ -14,7 +14,7 @@ namespace Schedoo.Server.Controllers
         : ControllerBase
     {
         // [Authorize(Roles = "Administrator,Group Leader")]
-        [HttpGet("get/{scheduleDateId}")]
+        [HttpGet("get/scheduleDateId={scheduleDateId}")]
         public async Task<IActionResult> GetAttendances(int scheduleDateId)
         {
             var (startWeekDay, endWeekDay) = Extensions.GetMondayAndFriday();
@@ -29,7 +29,40 @@ namespace Schedoo.Server.Controllers
                 await UpdateAttendanceTable(startWeekDay, endWeekDay, scheduleDateId);
             }
 
-            return Ok(attendances);
+            var result = attendances.Select(a => new
+            {
+                Id = a.Id,
+                AttendanceStatus = a.AttendanceStatus,
+                ScheduleDateId = a.ScheduleDateId,
+                StudentName = a.Student.UserName,
+                Date = a.ScheduleDate.Date
+            });
+            
+            return Ok(result);
+        }
+        
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateAttendance(int id, [FromBody] AttendanceStatus attendanceStatus)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var entityToUpdate = await schedooContext.Attendances
+                .FirstAsync(a => a.Id == id);
+
+            if (entityToUpdate == null)
+            {
+                return NotFound();
+            }
+
+            entityToUpdate.AttendanceStatus = attendanceStatus;
+            
+            schedooContext.Entry(entityToUpdate).State = EntityState.Modified;
+            await schedooContext.SaveChangesAsync();
+
+            return NoContent();
         }
         
         private async Task UpdateAttendanceTable(DateTime startWeekDay, DateTime endWeekDay, int scheduleDateId) {

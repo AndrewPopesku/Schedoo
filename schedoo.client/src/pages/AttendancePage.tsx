@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "../api/axios";
 import { AxiosResponse, isAxiosError } from "axios";
-import { Attendance } from "../types/interfaces";
+import { Attendance, AttendanceStatus } from "../types/interfaces";
 import { getStatusString } from "../types/helpers";
+import { CircularProgress } from "@mui/material";
+import { AttendanceRow } from "../components/AttendanceRow";
 
-const ATD = 'attendance/get/';
+const ATD = 'attendance/get/scheduleDateId=';
 
 export function AttendancePage() {
     const { scheduleDateId } = useParams();
@@ -15,34 +17,38 @@ export function AttendancePage() {
         populateAttendanceData();
     }, []);
 
-    const table = 
-        <table>
-            <thead>
-                <th>Student</th>
-                <th>Status check</th>
-            </thead>
-            <tbody>
-                {attendances?.map((attendance) => (
-                    <tr>
-                        <td>{attendance.student.userName}</td>
-                        <td>{getStatusString(attendance.attendanceStatus)}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+    const date = attendances?.map(a => a.date)[0];
 
-    return attendances ? table : "nothing";
+    const content =
+        <section>
+            <h2>{date?.toString()}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Status check</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {attendances?.map((attendance, index) => (
+                        <AttendanceRow key={index} attendance={attendance}/>
+                    ))}
+                </tbody>
+            </table>
+        </section>
+
+    return attendances
+        ? content
+        : <CircularProgress />;
 
     async function populateAttendanceData() {
         try {
             const response: AxiosResponse = await axios.get(ATD + scheduleDateId);
             const responseData: Attendance[] = response.data;
-            console.log(responseData);
             setAttendances(responseData);
         } catch (err: any) {
             if (isAxiosError(err)) {
                 // Handle Axios-specific errors
-
                 console.error("Axios error:", err.message);
             } else {
                 // Handle general errors
@@ -51,4 +57,6 @@ export function AttendancePage() {
 
         }
     }
+
+    
 }

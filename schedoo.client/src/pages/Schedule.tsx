@@ -2,7 +2,7 @@ import {useEffect, useState } from "react";
 import {WeekType} from "../types/enums.ts";
 import {Group, Semester} from "../types/interfaces.ts";
 import {getCurrentWeekType} from "../types/helpers.ts";
-import {Autocomplete, Container, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import {Autocomplete, CircularProgress, Container, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import {ScheduleTable} from "../containers/ScheduleTable.tsx";
 import '../styles/Schedule.css';
 
@@ -16,8 +16,6 @@ export function Schedule() {
     const [semesters, setSemesters] = useState<Semester[]>([]);
     const [selectedSemesterId, setSelectedSemesterId] = useState<number>();
     const [openS, setOpenS] = useState<boolean>(false);
-
-    // const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         populateSemesterData();
@@ -100,7 +98,9 @@ export function Schedule() {
         </Container>
     )
 
-    return (semesters.length || groups.length) ? content : "nothing";
+    return (semesters.length || groups.length) 
+        ? content 
+        : <CircularProgress/>;
     
     async function populateSemesterData() {
         await fetch('getsemesters')

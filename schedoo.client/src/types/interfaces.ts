@@ -78,14 +78,14 @@ export interface ScheduleDate {
 
 export interface Attendance {
     id: number,
-    scheduleDate: ScheduleDate,
-    student: User,
+    date: Date,
+    studentName: string,
     attendanceStatus: AttendanceStatus
 }
 
 export enum AttendanceStatus {
-    Present,
-    Absent
+    Present = 0,
+    Absent = 1
 }
 
 export interface User {

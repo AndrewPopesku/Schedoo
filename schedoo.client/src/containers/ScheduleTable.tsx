@@ -1,8 +1,9 @@
 import {useEffect, useState } from "react";
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import {ScheduleDate, Schedule, ScheduleAll, ScheduleViewData, TimeSlot} from "../types/interfaces.ts";
+import {ScheduleDate, Schedule, ScheduleViewData, TimeSlot} from "../types/interfaces.ts";
 import {ScheduleRow} from "../components/ScheduleRow.tsx";
 import { WeekType } from "../types/enums.ts";
+import { CircularProgress } from "@mui/material";
 
 export function ScheduleTable(props: { semesterId: number, weekType: WeekType, selectedGroupId: string}) {
     const [scheduleData, setScheduleData] = useState<Schedule[]>();
@@ -41,7 +42,7 @@ export function ScheduleTable(props: { semesterId: number, weekType: WeekType, s
         isEmptySchedule ? (
             <span>Empty schedule</span>
         ) : loading ? (
-            <span>Loading schedule...</span>
+            <CircularProgress/>
         ) : (
             <table className="table table-bordered">
                 <thead>

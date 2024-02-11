@@ -3,7 +3,7 @@ namespace Schedoo.Server.Models;
 public enum AttendanceStatus
 {
     Present,
-    Absent
+    Absent,
 }
 
 public class Attendance
