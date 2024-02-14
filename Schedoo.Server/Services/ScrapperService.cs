@@ -1,8 +1,11 @@
-﻿using OpenQA.Selenium;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using Schedoo.Server.Helpers;
 using Schedoo.Server.Models;
+using Group = Schedoo.Server.Models.Group;
 
 namespace Schedoo.Server.Services
 {
@@ -115,7 +118,23 @@ namespace Schedoo.Server.Services
             if (autocompleteDropdown != null)
             {
                 var semesterWebElements = autocompleteDropdown.FindElements(By.CssSelector(".MuiAutocomplete-option"));
-                resSemesters = semesterWebElements.Select(s => new Semester { Description = s.Text }).ToList();
+                var semesterDates = webDriver.FindElement(By.XPath("/html/body/div[1]/div/h1")).Text;
+                
+                string pattern = @"\b(\d{2})/(\d{2})/(\d{4})\b";
+                MatchCollection matches = Regex.Matches(semesterDates, pattern);
+        
+                string startDateString = matches[0].Value;
+                string endDateString = matches[1].Value;
+        
+                DateTime startDate = DateTime.ParseExact(startDateString, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                DateTime endDate = DateTime.ParseExact(endDateString, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+
+                resSemesters = semesterWebElements.Select(s => new Semester
+                {
+                    Description = s.Text,
+                    StartDay = startDate,
+                    EndDay = endDate
+                }).ToList();
             }
 
             return resSemesters;
