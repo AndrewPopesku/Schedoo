@@ -13,6 +13,8 @@ namespace Schedoo.Server.Controllers
     public class AttendanceController(SchedooContext schedooContext, UserManager<User> userManager)
         : ControllerBase
     {
+        private static object Lock = new();
+        
         // [Authorize(Roles = "Administrator,Group Leader")]
         [HttpGet("get/scheduleDateId={scheduleDateId}")]
         public async Task<IActionResult> GetAttendances(int scheduleDateId)
@@ -21,9 +23,11 @@ namespace Schedoo.Server.Controllers
             var attendances = schedooContext.Attendances
                 .Where(a => a.ScheduleDate.Id == scheduleDateId)
                 .Include(a => a.ScheduleDate)
+                    .ThenInclude(sd => sd.Schedule)
+                        .ThenInclude(s => s.Class)
                 .Include(a => a.Student);
             
-            if (!attendances.Any(a => a.ScheduleDate.Date >= startWeekDay 
+            if (!attendances.Any(a => a.ScheduleDate.Date >= startWeekDay
                                       && a.ScheduleDate.Date <= endWeekDay))
             {
                 await UpdateAttendanceTable(startWeekDay, endWeekDay, scheduleDateId);
@@ -33,8 +37,11 @@ namespace Schedoo.Server.Controllers
             {
                 Id = a.Id,
                 AttendanceStatus = a.AttendanceStatus,
+                ClassName = a.ScheduleDate.Schedule.Class.Name,
                 ScheduleDateId = a.ScheduleDateId,
-                StudentName = a.Student.UserName,
+                StudentName = a.Student.Name,
+                StudentSurname = a.Student.SurName,
+                StudentPatronymic = a.Student.Patronymic,
                 Date = a.ScheduleDate.Date
             });
             
@@ -65,12 +72,16 @@ namespace Schedoo.Server.Controllers
             return NoContent();
         }
         
-        private async Task UpdateAttendanceTable(DateTime startWeekDay, DateTime endWeekDay, int scheduleDateId) {
+        private async Task UpdateAttendanceTable(DateTime startWeekDay, DateTime endWeekDay, int scheduleDateId)
+        {
+            var attendanceExists = await schedooContext.Attendances
+                .AnyAsync(a => a.ScheduleDateId == scheduleDateId);
+            
             var scheduleDate = await schedooContext.ScheduleDates
                 .FirstAsync(sd => sd.Id == scheduleDateId);
             var roleName = "Student";
             var students = await userManager.GetUsersInRoleAsync(roleName);
-                
+            
             foreach (var student in students)
             {
                 var attendance = new Attendance
@@ -79,10 +90,10 @@ namespace Schedoo.Server.Controllers
                     StudentId = student.Id,
                     AttendanceStatus = AttendanceStatus.Present,
                 };
-
+                
                 await schedooContext.Attendances.AddAsync(attendance);
             }
-
+    
             await schedooContext.SaveChangesAsync();
         }
     }
