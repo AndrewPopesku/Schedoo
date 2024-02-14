@@ -44,6 +44,9 @@ public static class Seeder
                 new()
                 {
                     Id = "9f4a48ff-1244-49ef-80ea-c70eb70d27e0",
+                    Name = "Admin",
+                    SurName = "Admin",
+                    Patronymic = "Admin",
                     UserName = "admin@test.com",
                     NormalizedUserName = "ADMIN@TEST.COM",
                     Email = "admin@test.com",
@@ -54,6 +57,9 @@ public static class Seeder
                 new()
                 {
                     Id = "6cc6af6a-edc3-4715-9b09-f7638543fe68",
+                    Name = "Vasya",
+                    SurName = "Hrosu",
+                    Patronymic = "Georgiyovich",
                     UserName = "groupleader@test.com",
                     NormalizedUserName = "GROUPLEADER@TEST.COM",
                     Email = "groupleader@test.com",
@@ -64,6 +70,9 @@ public static class Seeder
                 new()
                 {
                     Id = "98020454-c731-45e3-980c-1d1cec0ba390",
+                    Name = "Misha",
+                    SurName = "Paranchich",
+                    Patronymic = "Yuriyovich",
                     UserName = "student@test.com",
                     NormalizedUserName = "STUDENT@TEST.COM",
                     Email = "student@test.com",
