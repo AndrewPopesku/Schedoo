@@ -182,6 +182,20 @@ namespace Schedoo.Server.Migrations.SchedooIdentity
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Schedoo.Server.Models.Group", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Group");
+                });
+
             modelBuilder.Entity("Schedoo.Server.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -201,10 +215,17 @@ namespace Schedoo.Server.Migrations.SchedooIdentity
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("GroupId")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
@@ -218,13 +239,24 @@ namespace Schedoo.Server.Migrations.SchedooIdentity
                     b.Property<string>("PasswordHash")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Patronymic")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Position")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SurName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -235,6 +267,8 @@ namespace Schedoo.Server.Migrations.SchedooIdentity
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -250,15 +284,18 @@ namespace Schedoo.Server.Migrations.SchedooIdentity
                         {
                             Id = "9f4a48ff-1244-49ef-80ea-c70eb70d27e0",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "4a56bd0a-6d0a-4da9-9b5e-85680babf525",
+                            ConcurrencyStamp = "21199af1-bbcf-4d63-8a4d-9d386a379131",
                             Email = "admin@test.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
+                            Name = "Admin",
                             NormalizedEmail = "ADMIN@TEST.COM",
                             NormalizedUserName = "ADMIN@TEST.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFs3xIII4TLSeOhg6e+r7NRIw3jUBTydJesrbOaZcMSfrhvs+Yb/1gsCB+ZX1xC/Tw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELCUw8A6BHPqqmFmBR+3VLIMvYIR5SwwHI0KYHK2wpugokLYmb/uTzz0Uu4Jjxv7dg==",
+                            Patronymic = "Admin",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "e30551f1-373f-4af6-bf9c-ee8cc369d615",
+                            SecurityStamp = "c60efa2a-046d-4eee-a7f0-b6bc75061d2c",
+                            SurName = "Admin",
                             TwoFactorEnabled = false,
                             UserName = "admin@test.com"
                         },
@@ -266,15 +303,18 @@ namespace Schedoo.Server.Migrations.SchedooIdentity
                         {
                             Id = "6cc6af6a-edc3-4715-9b09-f7638543fe68",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "1625a363-f103-4ca6-b7d9-f1e56f7f81c6",
+                            ConcurrencyStamp = "2c7dbd64-b01c-43c7-97c6-726944b1e0a4",
                             Email = "groupleader@test.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
+                            Name = "Vasya",
                             NormalizedEmail = "GROUPLEADER@TEST.COM",
                             NormalizedUserName = "GROUPLEADER@TEST.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDORlMQKOPTO+o0WM54Jpy3t3f1mOMesnhNBoHuuOFKQYh/iIDSE6llI7PSSAfXDsw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEP7KXlb9gEpv8BjBXZV+I/u2VyLJFgGYGzPW4ph8Wj7pOX00zie4zeqHHefYFNHZNg==",
+                            Patronymic = "Georgiyovich",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "e1280bd9-bcec-4213-852f-9413c984b90d",
+                            SecurityStamp = "c682b7ce-7b5c-4781-a136-a58716a4e4aa",
+                            SurName = "Hrosu",
                             TwoFactorEnabled = false,
                             UserName = "groupleader@test.com"
                         },
@@ -282,15 +322,18 @@ namespace Schedoo.Server.Migrations.SchedooIdentity
                         {
                             Id = "98020454-c731-45e3-980c-1d1cec0ba390",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "4d1ee76e-de16-4de5-aa5d-f7a6264bcb04",
+                            ConcurrencyStamp = "b6762249-ac05-4b3d-949e-339d604d539c",
                             Email = "student@test.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
+                            Name = "Misha",
                             NormalizedEmail = "STUDENT@TEST.COM",
                             NormalizedUserName = "STUDENT@TEST.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEA5M8qMXkPdsezgEZyRXNR0E586MploIOHHOzXASDhc7AiShtdmHaM4k4AzapNOA0Q==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEF+qeRSnfgO677XQRTt1d3Q5wkxuKni6Tr99oYmqhq9nCwDqjV5FIi9dMuCCXeHcrw==",
+                            Patronymic = "Yuriyovich",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "8073bd9b-6196-411b-858e-f8dd04f7d7fa",
+                            SecurityStamp = "78e4edb7-5e10-42bb-ba19-2200cb442678",
+                            SurName = "Paranchich",
                             TwoFactorEnabled = false,
                             UserName = "student@test.com"
                         });
@@ -345,6 +388,15 @@ namespace Schedoo.Server.Migrations.SchedooIdentity
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Schedoo.Server.Models.User", b =>
+                {
+                    b.HasOne("Schedoo.Server.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId");
+
+                    b.Navigation("Group");
                 });
 #pragma warning restore 612, 618
         }
