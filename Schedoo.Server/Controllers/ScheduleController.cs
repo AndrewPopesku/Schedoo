@@ -40,6 +40,7 @@ namespace Schedoo.Server.Controllers
             if (!scheduleDatesDb.Any())
             {
                 await UpdateScheduleDateTable(schedulesDb, WeekType.Odd);
+                await UpdateScheduleDateTable(schedulesDb, WeekType.Even);
             }
 
             var result = new
