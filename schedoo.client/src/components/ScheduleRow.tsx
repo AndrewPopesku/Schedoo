@@ -28,9 +28,9 @@ export function ScheduleRow({data} : {data: ScheduleViewData}) {
         <tr>
             <td className="timeslot-cell">
             <div>
-                <p>{data.timeSlot.startTime}</p>
+                <p>{data.timeSlot.startTime.toString().slice(0, -3)}</p>
             <div className='line'></div>
-        <p>{data.timeSlot.endTime}</p>
+        <p>{data.timeSlot.endTime.toString().slice(0, -3)}</p>
         </div>
         </td>
         {scheduleSlot}

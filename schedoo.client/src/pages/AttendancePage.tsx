@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "../api/axios";
 import { AxiosResponse, isAxiosError } from "axios";
-import { Attendance, AttendanceStatus } from "../types/interfaces";
-import { getStatusString } from "../types/helpers";
+import { Attendance } from "../types/interfaces";
 import { CircularProgress } from "@mui/material";
 import { AttendanceRow } from "../components/AttendanceRow";
 
@@ -18,10 +17,12 @@ export function AttendancePage() {
     }, []);
 
     const date = attendances?.map(a => a.date)[0];
+    const className = attendances?.map(a => a.className)[0];
 
     const content =
         <section>
-            <h2>{date?.toString()}</h2>
+            <h2>{className}</h2>
+            <h4>{date?.toString()}</h4>
             <table>
                 <thead>
                     <tr>

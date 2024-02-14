@@ -48,7 +48,7 @@ export function Login() {
             setPwd('');
             console.log("Navigating to", from);
             navigate(from, { replace: true });
-        } catch (err) {
+        } catch (err: any) {
             if (!err?.response) {
                 setErrMsg('No Server Response');
             } else if (err.response?.status === 400) {
@@ -58,7 +58,7 @@ export function Login() {
             } else {
                 setErrMsg('Login Failed');
             }
-            errRef.current.focus();
+            errRef.current?.focus();
         }
     }
 

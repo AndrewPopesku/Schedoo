@@ -1,20 +1,21 @@
-import {useEffect, useState } from "react";
-import {WeekType} from "../types/enums.ts";
-import {Group, Semester} from "../types/interfaces.ts";
-import {getCurrentWeekType} from "../types/helpers.ts";
-import {Autocomplete, CircularProgress, Container, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import {ScheduleTable} from "../containers/ScheduleTable.tsx";
+import { useEffect, useState } from "react";
+import { WeekType } from "../types/enums.ts";
+import { Group, Semester } from "../types/interfaces.ts";
+import { getCurrentWeekType } from "../types/helpers.ts";
+import { Autocomplete, CircularProgress, Container, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { ScheduleTable } from "../containers/ScheduleTable.tsx";
 import '../styles/Schedule.css';
+import { useQueryState } from "../hooks/useQueryState.tsx";
 
 export function Schedule() {
-    const [weekType, setWeekType] = useState<WeekType>(WeekType.Odd);
+    const [weekType, setWeekType] = useState<WeekType>();
 
     const [groups, setGroups] = useState<Group[]>([]);
-    const [selectedGroupName, setSelectedGroupName] = useState<string>();
+    const [selectedGroupName, setSelectedGroupName] = useQueryState("groupName");
     const [openG, setOpenG] = useState<boolean>(false);
 
     const [semesters, setSemesters] = useState<Semester[]>([]);
-    const [selectedSemesterId, setSelectedSemesterId] = useState<number>();
+    const [selectedSemesterId, setSelectedSemesterId] = useQueryState("semesterId");
     const [openS, setOpenS] = useState<boolean>(false);
 
     useEffect(() => {
@@ -43,8 +44,9 @@ export function Schedule() {
 
                 <Autocomplete
                     id="async-select-semester"
-                    sx={{width: 220}}
-                    defaultValue={semesters.find(sem => sem.currentSemester)}
+                    sx={{ width: 220 }}
+                    defaultValue={semesters.find(sem => sem.id === Number(selectedSemesterId))
+                        ?? semesters.find(sem => sem.currentSemester)}
                     open={openS}
                     onOpen={() => setOpenS(true)}
                     onClose={() => setOpenS(false)}
@@ -70,7 +72,8 @@ export function Schedule() {
 
                 <Autocomplete
                     id="async-select-group"
-                    sx={{width: 150}}
+                    sx={{ width: 150 }}
+                    defaultValue={groups.find(g => g.name === selectedGroupName)}
                     open={openG}
                     onOpen={() => setOpenG(true)}
                     onClose={() => setOpenG(false)}
@@ -94,14 +97,14 @@ export function Schedule() {
                     )}
                 />
             </div>
-            <ScheduleTable semesterId={selectedSemesterId} weekType={weekType} selectedGroupId={selectedGroupName}/>
+            <ScheduleTable semesterId={selectedSemesterId} weekType={weekType} selectedGroupId={selectedGroupName} />
         </Container>
     )
 
-    return (semesters.length || groups.length) 
-        ? content 
-        : <CircularProgress/>;
-    
+    return (semesters.length || groups.length)
+        ? content
+        : <CircularProgress />;
+
     async function populateSemesterData() {
         await fetch('getsemesters')
             .then(response => {
@@ -143,8 +146,8 @@ export function Schedule() {
             });
 
     }
-    
-    function handleChangeWeekType(event: any, newWeekType: WeekType) {
+
+    function handleChangeWeekType(e: any, newWeekType: WeekType) {
         setWeekType(newWeekType);
     }
 }

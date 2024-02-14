@@ -17,10 +17,9 @@ export function ScheduleCell({ isActive, classData, scheduleDate }
             <div className="class-content">
                 <div className="class-header">
                     <p className="class-title">
-
                         {classData.name}
                     </p>
-                    <i>{} {classData.teacher.surname}</i>
+                    <i>{classData.teacher.surname} {classData.teacher.name}</i>
                 </div>
                 <div className="class-info">
                     <p className='class-type'>#{classData.lessonType.toLowerCase()}</p>

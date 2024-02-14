@@ -13,7 +13,7 @@ export function AttendanceRow({ attendance }
 
     return (
         <tr>
-            <td>{attendance.studentName}</td>
+            <td>{attendance.studentName} {attendance.studentSurname} {attendance.studentPatronymic}</td>
             <td>
                 <select
                     title="Select attendance status"
