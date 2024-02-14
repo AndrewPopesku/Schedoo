@@ -57,8 +57,8 @@ export interface Teacher {
 }
 
 export interface ScheduleAll {
-    oddWeekClasses: Schedule[],
-    evenWeekClasses: Schedule[],
+    oddWeekSchedule: Schedule[],
+    evenWeekSchedule: Schedule[],
 }
 
 export interface ScheduleViewData {
@@ -80,7 +80,10 @@ export interface Attendance {
     id: number,
     date: Date,
     studentName: string,
+    studentSurname: string,
+    studentPatronymic: string,
     attendanceStatus: AttendanceStatus
+    className: string,
 }
 
 export enum AttendanceStatus {
