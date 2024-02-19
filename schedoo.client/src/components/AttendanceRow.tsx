@@ -2,8 +2,9 @@ import { useState } from "react"
 import { Attendance, AttendanceStatus } from "../types/interfaces"
 import axios from "../api/axios";
 import { AxiosResponse, isAxiosError } from "axios";
+import { getAttendanceByIdReq } from "../api/requests";
 
-const ATDU = 'attendance/update/';
+
 
 export function AttendanceRow({ attendance }
     : {
@@ -34,7 +35,7 @@ export function AttendanceRow({ attendance }
 
     async function updateAttendanceStatus(statusToChange: AttendanceStatus) {
         try {
-            const response: AxiosResponse = await axios.put(ATDU + attendance.id, statusToChange,
+            const response: AxiosResponse = await axios.put(getAttendanceByIdReq(attendance.id), statusToChange,
                 {
                     headers: { 'Content-Type': 'application/json' },
                     withCredentials: true

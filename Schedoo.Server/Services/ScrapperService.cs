@@ -48,7 +48,7 @@ namespace Schedoo.Server.Services
             var resGroups = new List<Group>();
             
             ChromeOptions options = new ChromeOptions();
-            options.AddArgument("--headless");
+            // options.AddArgument("--headless");
             var webDriver = new ChromeDriver(options);
             webDriver.Navigate().GoToUrl("http://fmi-schedule.chnu.edu.ua/schedule?semester=55");
             Thread.Sleep(2000);
@@ -86,7 +86,7 @@ namespace Schedoo.Server.Services
         public List<Semester> GetSemesters()
         {
             ChromeOptions options = new ChromeOptions();
-            options.AddArgument("--headless");
+            // options.AddArgument("--headless");
             var webDriver = new ChromeDriver(options);
             
             var resSemesters = new List<Semester>();

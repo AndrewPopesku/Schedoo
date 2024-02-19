@@ -6,6 +6,9 @@ import { Autocomplete, CircularProgress, Container, TextField, ToggleButton, Tog
 import { ScheduleTable } from "../containers/ScheduleTable.tsx";
 import '../styles/Schedule.css';
 import { useQueryState } from "../hooks/useQueryState.tsx";
+import axios from "../api/axios.ts";
+import { AxiosResponse, isAxiosError } from "axios";
+import { getGroupsBySemesterIdReq, getSemestersReq } from "../api/requests.ts";
 
 export function Schedule() {
     const [weekType, setWeekType] = useState<WeekType>();
@@ -106,24 +109,27 @@ export function Schedule() {
         : <CircularProgress />;
 
     async function populateSemesterData() {
-        await fetch('getsemesters')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`)
-                }
+        try {
+            const response: AxiosResponse = await axios.get(getSemestersReq);
+            const responseData: Semester[] = response.data.semesters;
+            setSemesters(responseData);
 
-                return response.json();
-            })
-            .then((data: Semester[]) => {
-                setSemesters(data);
+            const currentSemester = responseData
+                .find(semester => semester.currentSemester);
+            if (currentSemester) {
+                setSelectedSemesterId(currentSemester.id);
+                setWeekType(response.data.weekType as WeekType);
+            }
+        } catch (err: any) {
+            if (isAxiosError(err)) {
+                // Handle Axios-specific errors
+                console.error("Axios error:", err.message);
+            } else {
+                // Handle general errors
+                console.error("General error:", err.message);
+            }
 
-                const currentSemester = data
-                    .find(semester => semester.currentSemester);
-                if (currentSemester) {
-                    setSelectedSemesterId(currentSemester.id);
-                    setWeekType(getCurrentWeekType(currentSemester));
-                }
-            });
+        }
     }
 
     async function populateGroupData() {
@@ -132,20 +138,26 @@ export function Schedule() {
             console.error("Selected semester ID is undefined");
             return;
         }
+        
+        try {
+            const response: AxiosResponse = 
+                await axios.get(getGroupsBySemesterIdReq(selectedSemesterId));
+            const responseData: Group[] = response.data;
+            setGroups(responseData);
+            
+        } catch (err: any) {
+            if (isAxiosError(err)) {
+                // Handle Axios-specific errors
+                console.error("Axios error:", err.message);
+            } else {
+                // Handle general errors
+                console.error("General error:", err.message);
+            }
 
-        await fetch('getgroups/semesterId=' + selectedSemesterId)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`)
-                }
-
-                return response.json();
-            })
-            .then((data: Group[]) => {
-                setGroups(data);
-            });
+        }
 
     }
+    
 
     function handleChangeWeekType(e: any, newWeekType: WeekType) {
         setWeekType(newWeekType);
