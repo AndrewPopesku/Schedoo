@@ -19,6 +19,7 @@ export function ScheduleRow({data} : {data: ScheduleViewData}) {
         return <ScheduleCell 
             key={day} 
             isActive={isActiveClass ?? false} 
+            isAttendanceAllowed={data.currentWeekType === data.weekType}
             classData={classData} 
             scheduleDate={scheduleDate} 
         />;

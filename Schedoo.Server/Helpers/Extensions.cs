@@ -21,14 +21,13 @@ public static class Extensions
         return (mondayOfWeek, fridayOfWeek);
     }
         
-    public static DateTime GetDateOfWeekDay(string dayOfWeek)
+    public static DateTime GetDateOfWeekDay(DateTime currentDate, string dayOfWeek)
     {
         if (!Enum.TryParse<DayOfWeek>(dayOfWeek, true, out DayOfWeek targetDayOfWeek))
         {
             throw new ArgumentException("Invalid day of the week.", nameof(dayOfWeek));
         }
 
-        DateTime currentDate = DateTime.Today;
         DayOfWeek currentDayOfWeek = currentDate.DayOfWeek;
 
         int daysToTargetDay = (int)targetDayOfWeek - (int)currentDayOfWeek;
@@ -37,9 +36,9 @@ public static class Extensions
         return targetDate;
     }
     
-    public static DateTime GetDateOfWeekDay(DayOfWeek dayOfWeek)
+    public static DateTime GetDateOfWeekDay(DateTime currentDate, DayOfWeek dayOfWeek)
     {
-        DateTime today = DateTime.Today;
+        DateTime today = currentDate;
         int daysUntilTarget = (int)dayOfWeek - (int)today.DayOfWeek;
 
         // If today is the target day, return today; otherwise, return the next occurrence.

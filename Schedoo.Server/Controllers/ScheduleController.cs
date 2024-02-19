@@ -5,7 +5,6 @@ using Schedoo.Server.Helpers;
 using Schedoo.Server.Models;
 using Schedoo.Server.Services;
 using System.Collections.Immutable;
-using System.Globalization;
 
 namespace Schedoo.Server.Controllers
 {
@@ -53,7 +52,7 @@ namespace Schedoo.Server.Controllers
                 },
                 TimeSlots = schedooContext.TimeSlots.ToImmutableSortedSet(),
                 Days = schedulesDb.Select(s => s.DayOfWeek.ToString()).Distinct(),
-                Dates = scheduleDatesDb.Select(sd => new {Id = sd.Id, Date = sd.Date, ScheduleId = sd.ScheduleId}),
+                Dates = scheduleDatesDb.Select(sd => new {Id = sd.Id, Date = sd.Date, ScheduleId = sd.ScheduleId})
             };
 
             return Ok(result);
@@ -89,15 +88,8 @@ namespace Schedoo.Server.Controllers
                 schedooContext.UpdateRange(semestersScrapped);
                 await schedooContext.SaveChangesAsync();
             }
-
-            var currentSemester = await semestersDb.FirstAsync(s => s.CurrentSemester);
-            var result = new
-            {
-                Semesters = semestersDb,
-                WeekType = GetWeekType(currentSemester.StartDay, DateTime.Now),
-            };
             
-            return Ok(result);
+            return Ok(semestersDb);
         }
 
         private async Task UpdateScheduleDateTable(IEnumerable<Schedule> scheduleDb, WeekType weekType)
@@ -146,16 +138,6 @@ namespace Schedoo.Server.Controllers
                     schedooContext.Set<T>().Add(entity);
                 }
             }
-        }
-
-        public static WeekType GetWeekType(DateTime termStartDate, DateTime dateToday)
-        {
-            TimeSpan diff = dateToday - termStartDate;
-            int days = (int)diff.TotalDays;
-
-            int dayOfWeek = (int)dateToday.DayOfWeek;
-            int weekNum = (days + dayOfWeek) / 7;
-            return (weekNum + 1) % 2 == 0 ? WeekType.Even : WeekType.Odd;
         }
     }
 }

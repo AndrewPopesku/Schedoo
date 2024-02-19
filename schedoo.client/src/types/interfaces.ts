@@ -68,6 +68,7 @@ export interface ScheduleViewData {
     days: string[] | undefined,
     dates: ScheduleDate[],
     currentDate: Date,
+    currentWeekType: WeekType
 }
 
 export interface ScheduleDate {
@@ -93,6 +94,6 @@ export enum AttendanceStatus {
 
 export interface User {
     id: string,
-    userName: string,
+    username: string,
     email: string
 }

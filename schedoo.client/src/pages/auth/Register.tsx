@@ -4,13 +4,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from '../../api/axios';
 import '../../styles/Auth.css'
 
+const USERNAME_REGEX = /^[a-zA-Z0-9_-]{3,16}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-const REGISTER_URL = '/register';
+const REGISTER_URL = 'account/register';
 
 export function Register() {
-    const emailRef = useRef();
+    const usernameRef = useRef();
     const errRef = useRef();
+
+    const [username, setUsername] = useState('');
+    const [validUsername, setValidUsername] = useState(false);
+    const [usernameFocus, setUsernameFocus] = useState(false);
 
     const [email, setEmail] = useState('');
     const [validEmail, setValidEmail] = useState(false);
@@ -28,8 +33,12 @@ export function Register() {
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        emailRef.current.focus();
+        usernameRef.current.focus();
     }, [])
+
+    useEffect(() => {
+        setValidUsername(USERNAME_REGEX.test(username));
+    }, [username])
 
     useEffect(() => {
         setValidEmail(EMAIL_REGEX.test(email));
@@ -42,7 +51,7 @@ export function Register() {
 
     useEffect(() => {
         setErrMsg('');
-    }, [email, pwd, matchPwd])
+    }, [username, email, pwd, matchPwd])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -56,6 +65,7 @@ export function Register() {
         try {
             const response = await axios.post(REGISTER_URL,
                 JSON.stringify({ 
+                    username: username,
                     email: email, 
                     password: pwd 
                 }),
@@ -72,6 +82,7 @@ export function Register() {
             setSuccess(true);
             //clear state and controlled inputs
             //need value attrib on inputs for this
+            setEmail('');
             setUser('');
             setPwd('');
             setMatchPwd('');
@@ -103,13 +114,35 @@ export function Register() {
                     <form onSubmit={handleSubmit}>
                         <label htmlFor="username">
                             Username:
+                            <FontAwesomeIcon icon={faCheck} className={validUsername ? "valid" : "hide"} />
+                            <FontAwesomeIcon icon={faTimes} className={validUsername || !username ? "hide" : "invalid"} />
+                        </label>
+                        <input
+                            type="text"
+                            id="username"
+                            ref={usernameRef}
+                            autoComplete="off"
+                            onChange={(e) => setUsername(e.target.value)}
+                            value={username}
+                            required
+                            aria-invalid={validUsername ? "false" : "true"}
+                            aria-describedby="uidnote"
+                            onFocus={() => setUsernameFocus(true)}
+                            onBlur={() => setUsernameFocus(false)}
+                        />
+                        <p id="uidnote" className={usernameFocus && username && !validUsername ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Invalid username format
+                        </p>
+
+                        <label htmlFor="email">
+                            Email:
                             <FontAwesomeIcon icon={faCheck} className={validEmail ? "valid" : "hide"} />
                             <FontAwesomeIcon icon={faTimes} className={validEmail || !email ? "hide" : "invalid"} />
                         </label>
                         <input
                             type="text"
-                            id="username"
-                            ref={emailRef}
+                            id="email"
                             autoComplete="off"
                             onChange={(e) => setEmail(e.target.value)}
                             value={email}
@@ -123,7 +156,6 @@ export function Register() {
                             <FontAwesomeIcon icon={faInfoCircle} />
                             Invalid email format
                         </p>
-
 
                         <label htmlFor="password">
                             Password:
