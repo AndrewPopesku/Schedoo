@@ -5,11 +5,13 @@ import { AxiosResponse, isAxiosError } from "axios";
 import { Attendance } from "../types/interfaces";
 import { CircularProgress } from "@mui/material";
 import { AttendanceRow } from "../components/AttendanceRow";
+import { useAuth } from "../hooks/useAuth";
 
 const ATD = 'attendance/get/scheduleDateId=';
 
 export function AttendancePage() {
     const { scheduleDateId } = useParams();
+    const {auth} = useAuth();
     const [attendances, setAttendances] = useState<Attendance[]>();
 
     useEffect(() => {
@@ -44,7 +46,16 @@ export function AttendancePage() {
 
     async function populateAttendanceData() {
         try {
-            const response: AxiosResponse = await axios.get(ATD + scheduleDateId);
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${auth?.accessToken}`,
+                }
+            }
+
+            const response: AxiosResponse = await axios.get(
+                "https://localhost:7122/attendance/get/scheduleDateId=" + scheduleDateId,
+                config
+            );
             const responseData: Attendance[] = response.data;
             setAttendances(responseData);
         } catch (err: any) {

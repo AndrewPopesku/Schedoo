@@ -6,6 +6,7 @@ import './App.css';
 import RequireAuth from './pages/auth/RequireAuth.tsx';
 import { Profile } from './pages/auth/Profile.tsx';
 import { SchedulePage } from './pages/SchedulePage.tsx';
+import { Unauthorized } from './pages/auth/Unauthorized.tsx';
 
 function App() {
     const location = useLocation();
@@ -22,7 +23,11 @@ function App() {
             />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
-            <Route path="profile" element={<Profile/>}/>
+            <Route path="/unauthorized" element={<Unauthorized/>}/>
+
+            <Route element={<RequireAuth allowedRoles={["Administrator", "Group Leader", "Student"]}/>}>
+                <Route path="/profile" element={<Profile/>}/>
+            </Route>
 
             <Route element={<RequireAuth allowedRoles={["Administrator", "Group Leader"]}/>}>
                 <Route path="/attendance/:scheduleDateId" element={<AttendancePage />} />

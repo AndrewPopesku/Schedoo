@@ -93,7 +93,10 @@ export enum AttendanceStatus {
 }
 
 export interface User {
-    id: string,
+    name: string,
+    surname: string,
+    patronymic: string,
+    email: string,
     username: string,
-    email: string
+    phoneNumber: string,
 }
