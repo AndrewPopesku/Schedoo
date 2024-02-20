@@ -1,11 +1,11 @@
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Schedule } from "./pages/Schedule.tsx";
 import { AttendancePage } from './pages/AttendancePage.tsx';
 import Register from './pages/auth/Register.tsx';
 import { Login } from './pages/auth/Login.tsx';
 import './App.css';
 import RequireAuth from './pages/auth/RequireAuth.tsx';
 import { Profile } from './pages/auth/Profile.tsx';
+import { SchedulePage } from './pages/SchedulePage.tsx';
 
 function App() {
     const location = useLocation();
@@ -18,7 +18,7 @@ function App() {
         <Routes>
             <Route
                 path="/schedule"
-                element={<Schedule prevSemesterId={prevSemesterId} />}
+                element={<SchedulePage prevSemesterId={prevSemesterId} />}
             />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />

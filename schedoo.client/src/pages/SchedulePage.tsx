@@ -174,13 +174,13 @@ export function SchedulePage() {
         if (!selectedSemesterId) {
             return;
         }
-        
+
         try {
             const response: AxiosResponse = 
                 await axios.get(getGroupsBySemesterIdReq(selectedSemesterId));
             const responseData: Group[] = response.data;
             setGroups(responseData);
-            
+
         } catch (err: any) {
             if (isAxiosError(err)) {
                 // Handle Axios-specific errors
@@ -193,10 +193,9 @@ export function SchedulePage() {
         }
 
     }
-    
+
 
     function handleChangeWeekType(e: any, newWeekType: WeekType) {
         setWeekType(newWeekType);
     }
 }
-

@@ -4,6 +4,9 @@ import {ScheduleDate, Schedule, ScheduleViewData, TimeSlot, ScheduleAll} from ".
 import {ScheduleRow} from "../components/ScheduleRow.tsx";
 import { WeekType } from "../types/enums.ts";
 import { CircularProgress } from "@mui/material";
+import { AxiosResponse, isAxiosError } from "axios";
+import axios from "../api/axios.ts";
+import { getScheduleByGroupNameReq } from "../api/requests.ts";
 
 export function ScheduleTable(props: { 
     semesterId: number, 
@@ -87,13 +90,9 @@ export function ScheduleTable(props: {
     async function populateScheduleData() {
         if (props.selectedGroupId) {
             try {
-                const response = await fetch('groupschedule/groupName=' + props.selectedGroupId);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const { dates, days, scheduleAll, timeSlots } = await response.json();
+                const response: AxiosResponse = 
+                    await axios.get(getScheduleByGroupNameReq(props.selectedGroupId));
+                const { dates, days, scheduleAll, timeSlots } = response.data;
 
                 if (scheduleAll.oddWeekSchedule) {
                     setScheduleAllData(scheduleAll);
@@ -107,10 +106,18 @@ export function ScheduleTable(props: {
                 } else {
                     setIsEmptySchedule(true);
                 }
-            } catch (error) {
-                console.error("Error fetching schedule data", error);
-            } finally {
-                setLoading(false); // Set loading to false after the asynchronous operation completes
+            } catch (err: any) {
+                if (isAxiosError(err)) {
+                    // Handle Axios-specific errors
+                    console.error("Axios error:", err.message);
+                } else {
+                    // Handle general errors
+                    console.error("General error:", err.message);
+                }
+
+            }
+            finally {
+                setLoading(false);
             }
         } else {
             setIsEmptySchedule(true);

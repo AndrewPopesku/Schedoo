@@ -88,8 +88,15 @@ namespace Schedoo.Server.Controllers
                 schedooContext.UpdateRange(semestersScrapped);
                 await schedooContext.SaveChangesAsync();
             }
-            
-            return Ok(semestersDb);
+
+            var currentSemester = await semestersDb.FirstAsync(s => s.CurrentSemester);
+            var result = new
+            {
+                Semesters = semestersDb,
+                WeekType = GetWeekType(currentSemester.StartDay, DateTime.Now),
+            };
+
+            return Ok(result);
         }
 
         private async Task UpdateScheduleDateTable(IEnumerable<Schedule> scheduleDb, WeekType weekType)
@@ -138,6 +145,16 @@ namespace Schedoo.Server.Controllers
                     schedooContext.Set<T>().Add(entity);
                 }
             }
+        }
+        
+        public static WeekType GetWeekType(DateTime termStartDate, DateTime dateToday)
+        {
+            TimeSpan diff = dateToday - termStartDate;
+            int days = (int)diff.TotalDays;
+
+            int dayOfWeek = (int)dateToday.DayOfWeek;
+            int weekNum = (days + dayOfWeek) / 7;
+            return (weekNum + 1) % 2 == 0 ? WeekType.Even : WeekType.Odd;
         }
     }
 }
