@@ -102,7 +102,7 @@ namespace Schedoo.Server.Controllers
                 {
                     ScheduleId = s.Id,
                     Schedule = s,
-                    Date = Extensions.GetDateOfWeekDay(s.DayOfWeek)
+                    Date = Extensions.GetDateOfWeekDay(DateTime.Now, s.DayOfWeek)
                 };
 
                 await schedooContext.ScheduleDates.AddAsync(newScheduleDate);

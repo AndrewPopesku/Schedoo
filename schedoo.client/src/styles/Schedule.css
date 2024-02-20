@@ -102,6 +102,11 @@ strong {
     animation: blinking 3s infinite;
 }
 
+.d-flex {
+    display: flex;
+    justify-content: space-between;
+}
+
 @keyframes blinking {
     0% {
         opacity: 1;

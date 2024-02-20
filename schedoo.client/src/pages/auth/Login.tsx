@@ -3,7 +3,7 @@ import axios from '../../api/axios'
 import { useAuth } from "../../hooks/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const LOGIN_URL = "/login";
+const LOGIN_URL = "account/login";
 
 export function Login() {
     const { setAuth } = useAuth();
@@ -33,7 +33,7 @@ export function Login() {
         try {
             const response = await axios.post(LOGIN_URL,
                 JSON.stringify({
-                    email: email,
+                    username: email,
                     password: pwd
                 }),
                 {
@@ -42,8 +42,9 @@ export function Login() {
                 }
             );
             const accessToken = response?.data?.accessToken;
-            const refreshToken = response?.data?.refreshToken;
-            setAuth({ email, pwd, accessToken, refreshToken });
+            const group = response?.data?.group;
+            const roles = response?.data.roles;
+            setAuth({ email, pwd, accessToken, roles, group });
             setEmail('');
             setPwd('');
             console.log("Navigating to", from);

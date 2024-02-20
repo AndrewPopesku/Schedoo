@@ -4,7 +4,8 @@ import { AttendancePage } from './pages/AttendancePage.tsx';
 import Register from './pages/auth/Register.tsx';
 import { Login } from './pages/auth/Login.tsx';
 import './App.css';
-// import RequireAuth from './pages/auth/RequireAuth.tsx';
+import RequireAuth from './pages/auth/RequireAuth.tsx';
+import { Profile } from './pages/auth/Profile.tsx';
 
 function App() {
     const location = useLocation();
@@ -21,10 +22,11 @@ function App() {
             />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="profile" element={<Profile/>}/>
 
-            {/* <Route element={<RequireAuth/>}> */}
-            <Route path="/attendance/:scheduleDateId" element={<AttendancePage />} />
-            {/* </Route> */}
+            <Route element={<RequireAuth allowedRoles={["Administrator", "Group Leader"]}/>}>
+                <Route path="/attendance/:scheduleDateId" element={<AttendancePage />} />
+            </Route>
         </Routes>
     );
 }

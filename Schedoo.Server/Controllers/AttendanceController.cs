@@ -13,9 +13,7 @@ namespace Schedoo.Server.Controllers
     public class AttendanceController(SchedooContext schedooContext, UserManager<User> userManager)
         : ControllerBase
     {
-        private static object Lock = new();
-        
-        // [Authorize(Roles = "Administrator,Group Leader")]
+        [Authorize(Roles = "Administrator,Group Leader")]
         [HttpGet("get/scheduleDateId={scheduleDateId}")]
         public async Task<IActionResult> GetAttendances(int scheduleDateId)
         {
