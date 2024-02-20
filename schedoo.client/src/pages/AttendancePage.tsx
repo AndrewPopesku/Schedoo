@@ -55,7 +55,6 @@ export function AttendancePage() {
                 // Handle general errors
                 console.error("General error:", err.message);
             }
-
         }
     }
 

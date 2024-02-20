@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -51,12 +52,6 @@ public class AccountController(
                 roles = userRoles,
                 group = user.GroupId,
                 username = user.UserName,
-                name = user.Name,
-                surname = user.SurName,
-                patronymic = user.Patronymic,
-                position = user.Position,
-                phoneNumber = user.PhoneNumber,
-                expiration = token.ValidTo
             });
         }
         return Unauthorized();
@@ -96,5 +91,34 @@ public class AccountController(
                 });
 
         return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+    }
+    
+    [HttpGet]
+    [Route("userprofile")]
+    [Authorize]
+    public async Task<IActionResult> GetUserProfileAsync()
+    {
+        // Get user claims
+        var user = await userManager.FindByNameAsync(User.Identity.Name);
+
+        // If we have no user...
+        if (user == null)
+            // Return error
+            return NotFound(new
+            {
+                // TODO: Localization
+                ErrorMessage = "User not found"
+            });
+
+        // Return token to user
+        return Ok(new
+        {
+            name = user.Name,
+            surname = user.SurName,
+            patronymic = user.Patronymic,
+            email = user.Email,
+            Username = user.UserName,
+            phoneNumber = user.PhoneNumber
+        });
     }
 }

@@ -41,7 +41,7 @@ builder.Services.AddIdentityCore<User>()
     .AddEntityFrameworkStores<SchedooIdentityContext>()
     .AddApiEndpoints();
 
-builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
+// builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
 
 // Adding Authentication
 builder.Services.AddAuthentication(options =>

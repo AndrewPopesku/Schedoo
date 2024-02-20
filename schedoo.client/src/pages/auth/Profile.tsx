@@ -1,7 +1,12 @@
+import { useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth"
 
 export function Profile() {
     const { auth } = useAuth();
+
+    useEffect(() => {
+        
+    }, [])
 
     return (
         <>
