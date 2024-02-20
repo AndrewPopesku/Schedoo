@@ -108,7 +108,7 @@ export function SchedulePage() {
                 <Autocomplete
                     id="async-select-group"
                     sx={{ width: 150 }}
-                    defaultValue={groups.find(g => g.name === selectedGroupName)}
+                    defaultValue={selectedGroupName}
                     open={openG}
                     onOpen={() => setOpenG(true)}
                     onClose={() => setOpenG(false)}

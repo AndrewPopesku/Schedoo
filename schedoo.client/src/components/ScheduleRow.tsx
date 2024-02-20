@@ -6,7 +6,7 @@ export function ScheduleRow({data} : {data: ScheduleViewData}) {
     
     var scheduleSlot = (data.days ?? []).map((day: string) => {
         const daySchedule = (data.scheduleData ?? [])
-            .find((sd: Schedule) => dayOfWeekToString(sd.dayOfWeek - 1) === day
+            .find((sd: Schedule) => dayOfWeekToString(sd.dayOfWeek - 1) === day.day
                 && sd.timeSlotId === data.timeSlot.id
             )
  
@@ -17,7 +17,7 @@ export function ScheduleRow({data} : {data: ScheduleViewData}) {
 
         const classData: Class = daySchedule?.class;
         return <ScheduleCell 
-            key={day} 
+            key={day.day} 
             isActive={isActiveClass ?? false} 
             isAttendanceAllowed={data.currentWeekType === data.weekType}
             classData={classData} 

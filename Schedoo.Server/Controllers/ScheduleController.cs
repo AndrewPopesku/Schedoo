@@ -51,7 +51,11 @@ namespace Schedoo.Server.Controllers
                     EvenWeekSchedule = schedulesDb.Where(cs => cs.WeekType == WeekType.Even)
                 },
                 TimeSlots = schedooContext.TimeSlots.ToImmutableSortedSet(),
-                Days = schedulesDb.Select(s => s.DayOfWeek.ToString()).Distinct(),
+                Days = schedulesDb.Select(s => new
+                {
+                    day = s.DayOfWeek.ToString(),
+                    date = Extensions.GetDateOfWeekDay(startWeekDate, s.DayOfWeek).ToString("dd/MM"),
+                }).Distinct(),
                 Dates = scheduleDatesDb.Select(sd => new {Id = sd.Id, Date = sd.Date, ScheduleId = sd.ScheduleId})
             };
 

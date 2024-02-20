@@ -11,6 +11,7 @@ import { getScheduleByGroupNameReq } from "../api/requests.ts";
 export function ScheduleTable(props: { 
     semesterId: number, 
     weekType: WeekType, 
+    currentWeekType: WeekType,
     selectedGroupId: string
 }) {
     const [scheduleAllData, setScheduleAllData] = useState<ScheduleAll>();
@@ -21,7 +22,7 @@ export function ScheduleTable(props: {
     const [timeSlots, setTimeSlots] = useState<TimeSlot[] | undefined>();
     const [days, setDays] = useState<string[]>();
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
-    const currentDay = (days !== undefined) ? days[currentDate.getDay() - 1] : undefined;
+    const currentDay = days?.map(d => d.day)[currentDate.getDay() - 1];
 
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -53,6 +54,10 @@ export function ScheduleTable(props: {
         )
     }
 
+    function dayToString(day) {
+        return day.day + " " + day.date;
+    }
+
     return (
         isEmptySchedule ? (
             <span>Empty schedule</span>
@@ -66,7 +71,12 @@ export function ScheduleTable(props: {
                         { days.map((day, index) => (
                             <th
                                 key={index}
-                            >{day === currentDay ? blinkingDotForCurrentDay(day) : day}</th>
+                            >{
+                                props.currentWeekType === props.weekType 
+                                ? day.day === currentDay 
+                                    ? blinkingDotForCurrentDay(dayToString(day)) 
+                                    : dayToString(day)
+                                : day.day}</th>
                         ))}
                     </tr>
                 </thead>
@@ -74,6 +84,7 @@ export function ScheduleTable(props: {
                     { timeSlots.map((timeSlot: TimeSlot) => {
                         const data: ScheduleViewData = { 
                             scheduleData: currentSchedule, 
+                            currentWeekType: props.currentWeekType,
                             weekType: props.weekType, 
                             timeSlot: timeSlot, 
                             days, 
