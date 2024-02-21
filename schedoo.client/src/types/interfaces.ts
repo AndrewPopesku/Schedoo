@@ -68,6 +68,7 @@ export interface ScheduleViewData {
     days: string[] | undefined,
     dates: ScheduleDate[],
     currentDate: Date,
+    isAttendanceAllowedToChange: boolean,
     currentWeekType: WeekType
 }
 
@@ -99,4 +100,9 @@ export interface User {
     email: string,
     username: string,
     phoneNumber: string,
+}
+
+export interface DayDate {
+    day: string,
+    date: string
 }

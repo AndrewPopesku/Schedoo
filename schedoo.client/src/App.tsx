@@ -9,18 +9,8 @@ import { SchedulePage } from './pages/SchedulePage.tsx';
 import { Unauthorized } from './pages/auth/Unauthorized.tsx';
 
 function App() {
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    const queryParams = new URLSearchParams(location.search);
-    const prevSemesterId = parseInt(queryParams.get("semesterId") || "", 10);
-
     return (
         <Routes>
-            <Route
-                path="/schedule"
-                element={<SchedulePage prevSemesterId={prevSemesterId} />}
-            />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/unauthorized" element={<Unauthorized/>}/>
@@ -28,6 +18,8 @@ function App() {
             <Route element={<RequireAuth allowedRoles={["Administrator", "Group Leader", "Student"]}/>}>
                 <Route path="/profile" element={<Profile/>}/>
             </Route>
+
+            <Route path="/schedule" element={<SchedulePage />}/>
 
             <Route element={<RequireAuth allowedRoles={["Administrator", "Group Leader"]}/>}>
                 <Route path="/attendance/:scheduleDateId" element={<AttendancePage />} />

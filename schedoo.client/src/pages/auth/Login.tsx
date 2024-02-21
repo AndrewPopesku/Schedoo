@@ -45,7 +45,6 @@ export function Login() {
             const group = response?.data?.group;
             const roles = response?.data.roles;
             setAuth({ email, pwd, accessToken, roles, group });
-            localStorage.setItem('accessToken', accessToken);
             setEmail('');
             setPwd('');
             console.log("Navigating to", from);

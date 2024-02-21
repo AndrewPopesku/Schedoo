@@ -153,12 +153,16 @@ namespace Schedoo.Server.Controllers
         
         public static WeekType GetWeekType(DateTime termStartDate, DateTime dateToday)
         {
-            TimeSpan diff = dateToday - termStartDate;
-            int days = (int)diff.TotalDays;
+            var mondayDate = Extensions.GetDateOfWeekDay(termStartDate, DayOfWeek.Monday);
+            var currentMondayDate = Extensions.GetDateOfWeekDay(dateToday, DayOfWeek.Monday);
+            int count = 1;
+            while (mondayDate.Date < currentMondayDate.Date)
+            {
+                mondayDate = mondayDate.AddDays(7);
+                count++;
+            }
 
-            int dayOfWeek = (int)dateToday.DayOfWeek;
-            int weekNum = (days + dayOfWeek) / 7;
-            return (weekNum + 1) % 2 == 0 ? WeekType.Even : WeekType.Odd;
+            return count % 2 == 0 ? WeekType.Even : WeekType.Odd;
         }
     }
 }

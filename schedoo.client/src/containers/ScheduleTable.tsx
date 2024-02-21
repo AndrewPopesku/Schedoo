@@ -1,29 +1,33 @@
-import {useEffect, useState } from "react";
+import {useContext, useEffect, useState } from "react";
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import {ScheduleDate, Schedule, ScheduleViewData, TimeSlot, ScheduleAll} from "../types/interfaces.ts";
+import {ScheduleDate, Schedule, TimeSlot, ScheduleAll, DayDate} from "../types/interfaces.ts";
 import {ScheduleRow} from "../components/ScheduleRow.tsx";
 import { WeekType } from "../types/enums.ts";
 import { CircularProgress } from "@mui/material";
 import { AxiosResponse, isAxiosError } from "axios";
 import axios from "../api/axios.ts";
 import { getScheduleByGroupNameReq } from "../api/requests.ts";
+import { IsCurrentWeekContext } from "../pages/SchedulePage.tsx";
 
-export function ScheduleTable(props: { 
-    semesterId: number, 
-    weekType: WeekType, 
-    currentWeekType: WeekType,
-    selectedGroupId: string
+export function ScheduleTable(props
+    : { 
+        semesterId: number, 
+        weekType: WeekType, 
+        isAttendanceAllowedToChange: boolean,
+        selectedGroupId: string
 }) {
+    const isCurrentWeekType = useContext(IsCurrentWeekContext);
+
     const [scheduleAllData, setScheduleAllData] = useState<ScheduleAll>();
     const [currentSchedule, setCurrentSchedule] = useState<Schedule[]>();
 
-    const [dates, setDates] = useState<ScheduleDate[]>();
-    const [isEmptySchedule, setIsEmptySchedule] = useState<boolean>(true);
-    const [timeSlots, setTimeSlots] = useState<TimeSlot[] | undefined>();
-    const [days, setDays] = useState<string[]>();
+    const [dayDates, setDayDates] = useState<DayDate[]>();
+    const [scheduleDates, setScheduleDates] = useState<ScheduleDate[]>();
+    const [timeSlots, setTimeSlots] = useState<TimeSlot[]>();
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
-    const currentDay = days?.map(d => d.day)[currentDate.getDay() - 1];
-
+    const currentDay = dayDates?.map((d: DayDate) => d.day)[currentDate.getDay() - 1];
+    
+    const [isEmptySchedule, setIsEmptySchedule] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -54,48 +58,49 @@ export function ScheduleTable(props: {
         )
     }
 
-    function dayToString(day) {
+    function dayToString(day: DayDate) {
         return day.day + " " + day.date;
     }
+
+    const content = (
+        <table className="table table-bordered">
+            <thead>
+                <tr>
+                    <th></th>
+                    { dayDates?.map((dayDate: DayDate, index: number) => (
+                        <th
+                            key={index}
+                        >{
+                            isCurrentWeekType 
+                            ? dayDate.day === currentDay 
+                                ? blinkingDotForCurrentDay(dayToString(dayDate)) 
+                                : dayToString(dayDate)
+                            : dayDate.day}</th>
+                    ))}
+                </tr>
+            </thead>
+            <tbody>
+                { timeSlots?.map((timeSlot: TimeSlot) => {
+                    return <ScheduleRow
+                        key={timeSlot.id}
+                        scheduleData={currentSchedule}
+                        weekType={props.weekType}
+                        timeSlot={timeSlot}
+                        dayDates={dayDates}
+                        scheduleDates={scheduleDates}
+                        currentDate={currentDate}
+                    />
+                })}
+            </tbody>
+        </table>
+    )
 
     return (
         isEmptySchedule ? (
             <span>Empty schedule</span>
         ) : loading ? (
             <CircularProgress/>
-        ) : (
-            <table className="table table-bordered">
-                <thead>
-                    <tr>
-                        <th></th>
-                        { days.map((day, index) => (
-                            <th
-                                key={index}
-                            >{
-                                props.currentWeekType === props.weekType 
-                                ? day.day === currentDay 
-                                    ? blinkingDotForCurrentDay(dayToString(day)) 
-                                    : dayToString(day)
-                                : day.day}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    { timeSlots.map((timeSlot: TimeSlot) => {
-                        const data: ScheduleViewData = { 
-                            scheduleData: currentSchedule, 
-                            currentWeekType: props.currentWeekType,
-                            weekType: props.weekType, 
-                            timeSlot: timeSlot, 
-                            days, 
-                            dates,
-                            currentDate 
-                        }
-                        return <ScheduleRow key={timeSlot.id} data={data} />
-                    })}
-                </tbody>
-            </table>
-        )
+        ) : content
     );
     
     async function populateScheduleData() {
@@ -111,21 +116,18 @@ export function ScheduleTable(props: {
                         ? scheduleAll?.oddWeekSchedule
                         : scheduleAll?.evenWeekSchedule);
                     setTimeSlots(timeSlots);
-                    setDays(days);
-                    setDates(dates);
+                    setDayDates(days);
+                    setScheduleDates(dates);
                     setIsEmptySchedule(false);
                 } else {
                     setIsEmptySchedule(true);
                 }
             } catch (err: any) {
                 if (isAxiosError(err)) {
-                    // Handle Axios-specific errors
                     console.error("Axios error:", err.message);
                 } else {
-                    // Handle general errors
                     console.error("General error:", err.message);
                 }
-
             }
             finally {
                 setLoading(false);

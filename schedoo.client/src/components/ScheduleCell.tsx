@@ -1,34 +1,43 @@
 import { useNavigate } from "react-router-dom";
 import { Class, ScheduleDate } from "../types/interfaces";
+import { useContext } from "react";
+import { IsCurrentWeekContext } from "../pages/SchedulePage";
 
-export function ScheduleCell({ isActive, isAttendanceAllowed, classData, scheduleDate }
-    : { isActive: boolean, isAttendanceAllowed: boolean, classData: Class, scheduleDate: ScheduleDate }) {
+export function ScheduleCell(props
+    : { 
+        isActive: boolean, 
+        classData: Class, 
+        scheduleDate: ScheduleDate 
+    }) {
+
+    const isCurrentWeekType = useContext(IsCurrentWeekContext);
     const navigate = useNavigate();
 
     function handleClick() {
-        1
-        if (scheduleDate) {
-            navigate(`/attendance/${scheduleDate.id}`);
+        if (props.scheduleDate) {
+            navigate(`/attendance/${props.scheduleDate.id}`);
         }
     }
 
     return (
-        <td className={isActive && isAttendanceAllowed ? 'active-card' : ''} >
-            {classData && 
+        <td className={props.isActive ? 'active-card' : ''} >
+            {props.classData && 
                 <div className="class-card">
                     <div className="class-content">
                         <div className="class-header">
                             <p className="class-title">
-                                {classData.name}
+                                {props.classData.name}
                             </p>
-                            <i>{classData.teacher.surname} {classData.teacher.name}</i>
+                            <i>
+                                {props.classData.teacher.surname} {props.classData.teacher.name} {props.classData.teacher.patronymic}
+                            </i>
                         </div>
                         <div className="d-flex">
                             <div className="class-info">
-                                <p className='class-type'>#{classData.lessonType.toLowerCase()}</p>
-                                <p className="class-room">{classData.room.name}</p>
+                                <p className='class-type'>#{props.classData.lessonType.toLowerCase()}</p>
+                                <p className="class-room">{props.classData.room.name}</p>
                             </div>
-                            { isAttendanceAllowed &&
+                            { isCurrentWeekType &&
                                 <div>
                                     <button
                                         onClick={handleClick}></button>

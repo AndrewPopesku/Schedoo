@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { WeekType } from "../types/enums.ts";
 import { Group, Semester } from "../types/interfaces.ts";
 import { Autocomplete, CircularProgress, Container, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
@@ -11,6 +11,8 @@ import { getGroupsBySemesterIdReq, getSemestersReq } from "../api/requests.ts";
 import { useAuth } from "../hooks/useAuth.tsx";
 import { useLocation, useNavigate } from "react-router-dom";
 
+export const IsCurrentWeekContext = createContext(false);
+
 export function SchedulePage() {
     const { auth, setAuth } = useAuth();
     const location = useLocation();
@@ -18,6 +20,7 @@ export function SchedulePage() {
 
     const [weekType, setWeekType] = useState<WeekType>();
     const [currentWeekType, setCurrentWeekType] = useState<WeekType>();
+    const [isCurrentWeekType, setIsCurrentWeekType] = useState<boolean>(true);
 
     const [groups, setGroups] = useState<Group[]>([]);
     const [selectedGroupName, setSelectedGroupName] = useQueryState("groupName");
@@ -35,12 +38,12 @@ export function SchedulePage() {
         setGroups([]);
         setSelectedGroupName(undefined);
         populateGroupData();
-
     }, [selectedSemesterId]);
 
     useEffect(() => {
         if (auth?.email && groups.length > 0) {
             const group = groups.find(g => g.id === auth.group);
+            
             if (group) {
                 setSelectedGroupName(group.name);
             }
@@ -49,7 +52,7 @@ export function SchedulePage() {
 
     const content = (
         <Container>
-            {auth?.email ? 
+            {auth?.email ?
                 <div className='auth-buttons'>
                     <div className="flexGrow">
                         <button onClick={() => setAuth({})}>Sign Out</button>
@@ -108,7 +111,7 @@ export function SchedulePage() {
                 <Autocomplete
                     id="async-select-group"
                     sx={{ width: 150 }}
-                    defaultValue={selectedGroupName}
+                    value={groups.find(group => group.name === selectedGroupName) || null}
                     open={openG}
                     onOpen={() => setOpenG(true)}
                     onClose={() => setOpenG(false)}
@@ -131,13 +134,15 @@ export function SchedulePage() {
                         />
                     )}
                 />
+
             </div>
-            <ScheduleTable 
-                semesterId={selectedSemesterId} 
-                weekType={weekType} 
-                currentWeekType={currentWeekType}
-                selectedGroupId={selectedGroupName} 
-            />
+            <IsCurrentWeekContext.Provider value={isCurrentWeekType}>
+                <ScheduleTable
+                    semesterId={selectedSemesterId}
+                    weekType={weekType}
+                    selectedGroupId={selectedGroupName}
+                />
+            </IsCurrentWeekContext.Provider>
         </Container>
     )
 
@@ -176,7 +181,7 @@ export function SchedulePage() {
         }
 
         try {
-            const response: AxiosResponse = 
+            const response: AxiosResponse =
                 await axios.get(getGroupsBySemesterIdReq(selectedSemesterId));
             const responseData: Group[] = response.data;
             setGroups(responseData);
@@ -197,5 +202,6 @@ export function SchedulePage() {
 
     function handleChangeWeekType(e: any, newWeekType: WeekType) {
         setWeekType(newWeekType);
+        setIsCurrentWeekType(currentWeekType === newWeekType);
     }
 }

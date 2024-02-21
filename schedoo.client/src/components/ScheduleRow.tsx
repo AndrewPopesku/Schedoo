@@ -1,40 +1,53 @@
-import {ScheduleCell} from "./ScheduleCell.tsx";
-import {dayOfWeekToString, isInTimeSlot} from "../types/helpers.ts";
-import { Class, ScheduleDate, Schedule, ScheduleViewData } from "../types/interfaces.ts";
+import { ScheduleCell } from "./ScheduleCell.tsx";
+import { dayOfWeekToString, isInTimeSlot } from "../types/helpers.ts";
+import { Class, ScheduleDate, Schedule, TimeSlot, DayDate } from "../types/interfaces.ts";
+import { WeekType } from "../types/enums.ts";
+import { useContext } from "react";
+import { IsCurrentWeekContext } from "../pages/SchedulePage.tsx";
 
-export function ScheduleRow({data} : {data: ScheduleViewData}) {
+export function ScheduleRow(props
+    : {
+        scheduleData: Schedule[],
+        weekType: WeekType,
+        timeSlot: TimeSlot,
+        dayDates: DayDate[],
+        scheduleDates: ScheduleDate[],
+        currentDate: Date
+    }) {
     
-    var scheduleSlot = (data.days ?? []).map((day: string) => {
-        const daySchedule = (data.scheduleData ?? [])
-            .find((sd: Schedule) => dayOfWeekToString(sd.dayOfWeek - 1) === day.day
-                && sd.timeSlotId === data.timeSlot.id
-            )
- 
-        const scheduleDate = data.dates.find((sd: ScheduleDate) => sd.scheduleId === daySchedule?.id);
+    const isCurrentWeekType = useContext(IsCurrentWeekContext)
 
-        const isActiveClass = (data.days && data.currentDate && (data.days[data.currentDate.getDay() - 1] === day))
-            && isInTimeSlot(data.currentDate, data.timeSlot);
-
+    var scheduleRow = props.dayDates?.map((dayDate: DayDate) => {
+        const daySchedule = props.scheduleData?.find((sd: Schedule) =>
+            dayOfWeekToString(sd.dayOfWeek - 1) === dayDate.day && sd.timeSlotId === props.timeSlot.id
+        )
+        const scheduleDate = props.scheduleDates.find((sd: ScheduleDate) =>
+            sd.scheduleId === daySchedule?.id
+        );
+        const isActiveClass = (props.dayDates && props.currentDate
+            && (props.dayDates[props.currentDate.getDay() - 1] === dayDate))
+            && isInTimeSlot(props.currentDate, props.timeSlot)
+            && isCurrentWeekType;
         const classData: Class = daySchedule?.class;
-        return <ScheduleCell 
-            key={day.day} 
-            isActive={isActiveClass ?? false} 
-            isAttendanceAllowed={data.currentWeekType === data.weekType}
-            classData={classData} 
-            scheduleDate={scheduleDate} 
+
+        return <ScheduleCell
+            key={dayDate.day}
+            isActive={isActiveClass}
+            classData={classData}
+            scheduleDate={scheduleDate}
         />;
     })
-    
+
     return (
         <tr>
             <td className="timeslot-cell">
-            <div>
-                <p>{data.timeSlot.startTime.toString().slice(0, -3)}</p>
-            <div className='line'></div>
-        <p>{data.timeSlot.endTime.toString().slice(0, -3)}</p>
-        </div>
-        </td>
-        {scheduleSlot}
-    </tr>
-);
+                <div>
+                    <p>{props.timeSlot.startTime.toString().slice(0, -3)}</p>
+                    <div className='line'></div>
+                    <p>{props.timeSlot.endTime.toString().slice(0, -3)}</p>
+                </div>
+            </td>
+            {scheduleRow}
+        </tr>
+    );
 };

@@ -6,15 +6,20 @@ import { getAttendanceByIdReq } from "../api/requests";
 
 
 
-export function AttendanceRow({ attendance }
+export function AttendanceRow(props
     : {
         attendance: Attendance
     }) {
-    const [status, setStatus] = useState<AttendanceStatus>(attendance.attendanceStatus);
+    const [status, setStatus] = useState<AttendanceStatus>(props.attendance.attendanceStatus);
+    
+    function handleStatusChange(statusToChange: AttendanceStatus) {
+        setStatus(statusToChange);
+        updateAttendanceStatus(statusToChange);
+    };
 
     return (
         <tr>
-            <td>{attendance.studentName} {attendance.studentSurname} {attendance.studentPatronymic}</td>
+            <td>{props.attendance.studentName} {props.attendance.studentSurname} {props.attendance.studentPatronymic}</td>
             <td>
                 <select
                     title="Select attendance status"
@@ -28,11 +33,6 @@ export function AttendanceRow({ attendance }
         </tr>
     )
 
-    function handleStatusChange(statusToChange: AttendanceStatus) {
-        setStatus(statusToChange);
-        updateAttendanceStatus(statusToChange);
-    };
-
     async function updateAttendanceStatus(statusToChange: AttendanceStatus) {
         try {
             const response: AxiosResponse = await axios.put(getAttendanceByIdReq(attendance.id), statusToChange,
@@ -43,10 +43,8 @@ export function AttendanceRow({ attendance }
             return response;
         } catch (err: any) {
             if (isAxiosError(err)) {
-                // Handle Axios-specific errors
                 console.error("Axios error:", err.message);
             } else {
-                // Handle general errors
                 console.error("General error:", err.message);
             }
         }
