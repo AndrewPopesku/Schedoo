@@ -1,11 +1,18 @@
 import { useContext, useEffect } from "react";
 import AuthContext from "../context/AuthProvider.tsx";
+import { Auth } from "../types/interfaces.ts";
 
 export function useAuth() {
-    const { auth, setAuth } = useContext(AuthContext);
+    const context = useContext(AuthContext);
+
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+
+    const { auth, setAuth } = context;
 
     // Function to update authentication state and store it in localStorage
-    const updateAuth = (newAuth) => {
+    const updateAuth = (newAuth: Auth) => {
         setAuth(newAuth);
         localStorage.setItem('auth', JSON.stringify(newAuth));
     };

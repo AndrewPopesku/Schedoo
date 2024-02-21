@@ -106,3 +106,10 @@ export interface DayDate {
     day: string,
     date: string
 }
+
+export interface Auth {
+    accessToken: string,
+    email: string,
+    groupId: string,
+    roles: string[]
+}

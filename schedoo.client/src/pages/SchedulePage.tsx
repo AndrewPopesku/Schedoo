@@ -12,11 +12,14 @@ import { useAuth } from "../hooks/useAuth.tsx";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export const IsCurrentWeekContext = createContext(false);
+export const CanEditAttendanceContext = createContext(false);
 
 export function SchedulePage() {
     const { auth, setAuth } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
+
+    const [canEditAttendance, setCanEditAttendance] = useState<boolean>(false);
 
     const [weekType, setWeekType] = useState<WeekType>();
     const [currentWeekType, setCurrentWeekType] = useState<WeekType>();
@@ -30,6 +33,7 @@ export function SchedulePage() {
     const [selectedSemesterId, setSelectedSemesterId] = useQueryState("semesterId");
     const [openS, setOpenS] = useState<boolean>(false);
 
+
     useEffect(() => {
         populateSemesterData();
     }, []);
@@ -42,11 +46,17 @@ export function SchedulePage() {
 
     useEffect(() => {
         if (auth?.email && groups.length > 0) {
-            const group = groups.find(g => g.id === auth.group);
+            const group = groups.find(g => g.id === auth.groupId);
             
             if (group) {
                 setSelectedGroupName(group.name);
             }
+
+            if (auth.roles.includes("Group Leader")) {
+                setCanEditAttendance(true);
+            } else {
+                setCanEditAttendance(false);
+            }   
         }
     }, [auth, groups]);
 
@@ -136,13 +146,15 @@ export function SchedulePage() {
                 />
 
             </div>
-            <IsCurrentWeekContext.Provider value={isCurrentWeekType}>
-                <ScheduleTable
-                    semesterId={selectedSemesterId}
-                    weekType={weekType}
-                    selectedGroupId={selectedGroupName}
-                />
-            </IsCurrentWeekContext.Provider>
+            <CanEditAttendanceContext.Provider value={canEditAttendance}>
+                <IsCurrentWeekContext.Provider value={isCurrentWeekType}>
+                    <ScheduleTable
+                        semesterId={selectedSemesterId}
+                        weekType={weekType}
+                        selectedGroupId={selectedGroupName}
+                    />
+                </IsCurrentWeekContext.Provider>
+            </CanEditAttendanceContext.Provider>
         </Container>
     )
 

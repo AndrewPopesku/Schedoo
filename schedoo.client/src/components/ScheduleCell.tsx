@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Class, ScheduleDate } from "../types/interfaces";
 import { useContext } from "react";
-import { IsCurrentWeekContext } from "../pages/SchedulePage";
+import { CanEditAttendanceContext, IsCurrentWeekContext } from "../pages/SchedulePage";
 
 export function ScheduleCell(props
     : { 
@@ -11,6 +11,7 @@ export function ScheduleCell(props
     }) {
 
     const isCurrentWeekType = useContext(IsCurrentWeekContext);
+    const canEditAttendance = useContext(CanEditAttendanceContext);
     const navigate = useNavigate();
 
     function handleClick() {
@@ -37,7 +38,7 @@ export function ScheduleCell(props
                                 <p className='class-type'>#{props.classData.lessonType.toLowerCase()}</p>
                                 <p className="class-room">{props.classData.room.name}</p>
                             </div>
-                            { isCurrentWeekType &&
+                            { isCurrentWeekType && canEditAttendance &&
                                 <div>
                                     <button
                                         onClick={handleClick}></button>
