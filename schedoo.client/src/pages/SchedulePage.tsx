@@ -19,20 +19,19 @@ export function SchedulePage() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const [canEditAttendance, setCanEditAttendance] = useState<boolean>(false);
-
     const [weekType, setWeekType] = useState<WeekType>();
     const [currentWeekType, setCurrentWeekType] = useState<WeekType>();
     const [isCurrentWeekType, setIsCurrentWeekType] = useState<boolean>(true);
-
+    
     const [groups, setGroups] = useState<Group[]>([]);
     const [selectedGroupName, setSelectedGroupName] = useQueryState("groupName");
     const [openG, setOpenG] = useState<boolean>(false);
-
+    
     const [semesters, setSemesters] = useState<Semester[]>([]);
     const [selectedSemesterId, setSelectedSemesterId] = useQueryState("semesterId");
     const [openS, setOpenS] = useState<boolean>(false);
-
+    
+    const [canEditAttendance, setCanEditAttendance] = useState<boolean>(false);
 
     useEffect(() => {
         populateSemesterData();
@@ -45,20 +44,24 @@ export function SchedulePage() {
     }, [selectedSemesterId]);
 
     useEffect(() => {
+        setIndividualOptions();
+    }, [auth, groups]);
+
+    function setIndividualOptions() {
         if (auth?.email && groups.length > 0) {
             const group = groups.find(g => g.id === auth.groupId);
             
             if (group) {
                 setSelectedGroupName(group.name);
+                console.log(1)
             }
-
             if (auth.roles.includes("Group Leader")) {
                 setCanEditAttendance(true);
             } else {
                 setCanEditAttendance(false);
             }   
         }
-    }, [auth, groups]);
+    }
 
     const content = (
         <Container>
@@ -67,7 +70,7 @@ export function SchedulePage() {
                     <div className="flexGrow">
                         <button onClick={() => setAuth({})}>Sign Out</button>
                         <button onClick={() => navigate("/profile")}>Profile</button>
-                        <h4>{auth?.email} | {groups.find(g => g.id === auth?.group)?.name}</h4>
+                        <h4>{auth?.email} | {groups.find(g => g.id === auth?.groupId)?.name}</h4>
                     </div>
                 </div>
                 :
@@ -197,7 +200,7 @@ export function SchedulePage() {
                 await axios.get(getGroupsBySemesterIdReq(selectedSemesterId));
             const responseData: Group[] = response.data;
             setGroups(responseData);
-
+            setIndividualOptions();
         } catch (err: any) {
             if (isAxiosError(err)) {
                 // Handle Axios-specific errors

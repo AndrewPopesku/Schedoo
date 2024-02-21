@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import axios from '../../api/axios'
 import { useAuth } from "../../hooks/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Auth } from "../../types/interfaces";
 
 const LOGIN_URL = "account/login";
 
@@ -42,9 +43,15 @@ export function Login() {
                 }
             );
             const accessToken = response?.data?.accessToken;
-            const group = response?.data?.group;
+            const groupId = response?.data?.group;
             const roles = response?.data.roles;
-            setAuth({ email, pwd, accessToken, roles, group });
+            const auth: Auth = {
+                email: email,
+                accessToken: accessToken,
+                groupId: groupId,
+                roles: roles
+            }
+            setAuth(auth);
             setEmail('');
             setPwd('');
             console.log("Navigating to", from);
