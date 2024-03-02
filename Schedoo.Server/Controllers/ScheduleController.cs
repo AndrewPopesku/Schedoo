@@ -5,12 +5,16 @@ using Schedoo.Server.Helpers;
 using Schedoo.Server.Models;
 using Schedoo.Server.Services;
 using System.Collections.Immutable;
+using Microsoft.AspNetCore.Identity;
 
 namespace Schedoo.Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ScheduleController(SchedooContext schedooContext, ScrapperService scrapperService)
+    public class ScheduleController(
+        SchedooContext schedooContext, 
+        ScrapperService scrapperService,
+        UserManager<User> userManager)
         : ControllerBase
     {
         [HttpGet("groupschedule/groupName={groupName}")]
@@ -18,6 +22,9 @@ namespace Schedoo.Server.Controllers
         {
             var (startWeekDate, endWeekDate) = Extensions.GetMondayAndFriday();
 
+            var semester = await schedooContext.Semesters
+                .FirstAsync(s => s.CurrentSemester);
+            
             var schedulesDb = schedooContext.Schedules
                 .Include(s => s.Group)
                 .Where(s => s.Group.Name == groupName)
@@ -39,24 +46,23 @@ namespace Schedoo.Server.Controllers
 
             if (!scheduleDatesDb.Any())
             {
-                await UpdateScheduleDateTable(schedulesDb, WeekType.Odd);
-                await UpdateScheduleDateTable(schedulesDb, WeekType.Even);
+                await UpdateScheduleDateTable(schedulesDb, GetWeekType(semester.StartDay, DateTime.Now));
             }
 
             var result = new
             {
-                ScheduleAll = new
+                scheduleAll = new
                 {
-                    OddWeekSchedule = schedulesDb.Where(cs => cs.WeekType == WeekType.Odd),
-                    EvenWeekSchedule = schedulesDb.Where(cs => cs.WeekType == WeekType.Even)
+                    oddWeekSchedule = schedulesDb.Where(cs => cs.WeekType == WeekType.Odd),
+                    evenWeekSchedule = schedulesDb.Where(cs => cs.WeekType == WeekType.Even)
                 },
-                TimeSlots = schedooContext.TimeSlots.ToImmutableSortedSet(),
-                Days = schedulesDb.Select(s => new
+                timeSlots = schedooContext.TimeSlots.ToImmutableSortedSet(),
+                days = schedulesDb.Select(s => new
                 {
                     day = s.DayOfWeek.ToString(),
                     date = Extensions.GetDateOfWeekDay(startWeekDate, s.DayOfWeek).ToString("dd/MM"),
                 }).Distinct(),
-                Dates = scheduleDatesDb.Select(sd => new {Id = sd.Id, Date = sd.Date, ScheduleId = sd.ScheduleId})
+                dates = scheduleDatesDb.Select(sd => new {Id = sd.Id, Date = sd.Date, ScheduleId = sd.ScheduleId})
             };
 
             return Ok(result);
@@ -107,6 +113,7 @@ namespace Schedoo.Server.Controllers
         {
             var scheduleDbIterable = scheduleDb
                 .Where(s => s.WeekType == weekType);
+            var scheduleDates = new List<ScheduleDate>();
             foreach (var s in scheduleDbIterable)
             {
                 var newScheduleDate = new ScheduleDate
@@ -115,11 +122,17 @@ namespace Schedoo.Server.Controllers
                     Schedule = s,
                     Date = Extensions.GetDateOfWeekDay(DateTime.Now, s.DayOfWeek)
                 };
-
-                await schedooContext.ScheduleDates.AddAsync(newScheduleDate);
+                
+                scheduleDates.Add(newScheduleDate);
             }
 
+            await schedooContext.ScheduleDates.AddRangeAsync(scheduleDates);
             await schedooContext.SaveChangesAsync();
+
+            foreach (var sd in scheduleDates)
+            {
+                await UpdateAttendanceTable(sd.Id);
+            }
         }
 
         private async Task UpdateScheduleTable(string groupName)
@@ -136,6 +149,31 @@ namespace Schedoo.Server.Controllers
             await AddRangeIfNotExistAsync(teachers);
             await AddRangeIfNotExistAsync(rooms);
             await AddRangeIfNotExistAsync(scheduleToDb);
+            await schedooContext.SaveChangesAsync();
+        }
+        
+        private async Task UpdateAttendanceTable(int scheduleDateId)
+        {
+            var scheduleDate = await schedooContext.ScheduleDates
+                .Include(sd => sd.Schedule)
+                .FirstAsync(sd => sd.Id == scheduleDateId);
+            var roleName = "Student";
+            var students = (await userManager.GetUsersInRoleAsync(roleName))
+                .Where(s => s.GroupId == scheduleDate.Schedule.GroupId);
+            
+            foreach (var student in students)
+            {
+                var attendance = new Attendance
+                {
+                    ScheduleDateId = scheduleDate.Id,
+                    StudentId = student.Id,
+                    StudentFullName = student.Name + " " + student.SurName + " " + student.Patronymic,
+                    AttendanceStatus = AttendanceStatus.Present,
+                };
+                
+                await schedooContext.Attendances.AddAsync(attendance);
+            }
+    
             await schedooContext.SaveChangesAsync();
         }
 

@@ -81,9 +81,7 @@ export interface ScheduleDate {
 export interface Attendance {
     id: number,
     date: Date,
-    studentName: string,
-    studentSurname: string,
-    studentPatronymic: string,
+    studentFullName: string,
     attendanceStatus: AttendanceStatus
     className: string,
 }
@@ -100,6 +98,8 @@ export interface User {
     email: string,
     username: string,
     phoneNumber: string,
+    attendancesTotal: number,
+    attendancesPresent: number
 }
 
 export interface DayDate {

@@ -9,28 +9,26 @@ import axios from "../api/axios.ts";
 import { AxiosResponse, isAxiosError } from "axios";
 import { getGroupsBySemesterIdReq, getSemestersReq } from "../api/requests.ts";
 import { useAuth } from "../hooks/useAuth.tsx";
-import { useLocation, useNavigate } from "react-router-dom";
+import { NavBar } from "../components/NavBar.tsx";
 
 export const IsCurrentWeekContext = createContext(false);
 export const CanEditAttendanceContext = createContext(false);
 
 export function SchedulePage() {
-    const { auth, setAuth } = useAuth();
-    const location = useLocation();
-    const navigate = useNavigate();
+    const { auth } = useAuth();
 
     const [weekType, setWeekType] = useState<WeekType>();
     const [currentWeekType, setCurrentWeekType] = useState<WeekType>();
     const [isCurrentWeekType, setIsCurrentWeekType] = useState<boolean>(true);
-    
+
     const [groups, setGroups] = useState<Group[]>([]);
     const [selectedGroupName, setSelectedGroupName] = useQueryState("groupName");
     const [openG, setOpenG] = useState<boolean>(false);
-    
+
     const [semesters, setSemesters] = useState<Semester[]>([]);
     const [selectedSemesterId, setSelectedSemesterId] = useQueryState("semesterId");
     const [openS, setOpenS] = useState<boolean>(false);
-    
+
     const [canEditAttendance, setCanEditAttendance] = useState<boolean>(false);
 
     useEffect(() => {
@@ -50,115 +48,101 @@ export function SchedulePage() {
     function setIndividualOptions() {
         if (auth?.email && groups.length > 0) {
             const group = groups.find(g => g.id === auth.groupId);
-            
+
             if (group) {
                 setSelectedGroupName(group.name);
-                console.log(1)
             }
             if (auth.roles.includes("Group Leader")) {
                 setCanEditAttendance(true);
             } else {
                 setCanEditAttendance(false);
-            }   
+            }
         }
     }
 
     const content = (
-        <Container>
-            {auth?.email ?
-                <div className='auth-buttons'>
-                    <div className="flexGrow">
-                        <button onClick={() => setAuth({})}>Sign Out</button>
-                        <button onClick={() => navigate("/profile")}>Profile</button>
-                        <h4>{auth?.email} | {groups.find(g => g.id === auth?.groupId)?.name}</h4>
-                    </div>
-                </div>
-                :
-                <div className='auth-buttons'>
-                    <div className="flexGrow">
-                        <button onClick={() => navigate("/login", { state: { from: location } })}>Log in</button>
-                        <button onClick={() => navigate("/register", { state: { from: location } })}>Register</button>
-                    </div>
-                </div>
-            }
-            <div className='filters'>
-                <ToggleButtonGroup
-                    color="primary"
-                    value={weekType}
-                    exclusive
-                    onChange={handleChangeWeekType}
-                    aria-label="Platform"
-                >
-                    <ToggleButton value={WeekType.Odd}>Odd</ToggleButton>
-                    <ToggleButton value={WeekType.Even}>Even</ToggleButton>
-                </ToggleButtonGroup>
+        <>
+            <NavBar/>
+            <Container>
+                <div className='filters'>
+                    <ToggleButtonGroup
+                        color="primary"
+                        value={weekType}
+                        exclusive
+                        onChange={handleChangeWeekType}
+                        aria-label="Platform"
+                    >
+                        <ToggleButton value={WeekType.Odd}>Odd</ToggleButton>
+                        <ToggleButton value={WeekType.Even}>Even</ToggleButton>
+                    </ToggleButtonGroup>
 
-                <Autocomplete
-                    id="async-select-semester"
-                    sx={{ width: 220 }}
-                    defaultValue={semesters.find(sem => sem.id === Number(selectedSemesterId))
-                        ?? semesters.find(sem => sem.currentSemester)}
-                    open={openS}
-                    onOpen={() => setOpenS(true)}
-                    onClose={() => setOpenS(false)}
-                    onChange={(e, newValue) => setSelectedSemesterId(newValue ? newValue.id : undefined)}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    getOptionLabel={(option) => (option.description ? option.description : '')}
-                    options={semesters}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            label="Semesters"
-                            inputProps={{
-                                ...params.inputProps,
-                                endadornment: (
-                                    <>
-                                        {params.inputProps.endadornment}
-                                    </>
-                                )
-                            }}
-                        />
-                    )}
-                />
-
-                <Autocomplete
-                    id="async-select-group"
-                    sx={{ width: 150 }}
-                    value={groups.find(group => group.name === selectedGroupName) || null}
-                    open={openG}
-                    onOpen={() => setOpenG(true)}
-                    onClose={() => setOpenG(false)}
-                    onChange={(e, newValue) => setSelectedGroupName(newValue ? newValue.name : '')}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    getOptionLabel={(option) => (option.name ? option.name : '')}
-                    options={groups}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            label="Groups"
-                            inputProps={{
-                                ...params.inputProps,
-                                endadornment: (
-                                    <>
-                                        {params.inputProps.endadornment}
-                                    </>
-                                )
-                            }}
-                        />
-                    )}
-                />
-
-            </div>
-            <CanEditAttendanceContext.Provider value={canEditAttendance}>
-                <IsCurrentWeekContext.Provider value={isCurrentWeekType}>
-                    <ScheduleTable
-                        semesterId={selectedSemesterId}
-                        weekType={weekType}
-                        selectedGroupId={selectedGroupName}
+                    <Autocomplete
+                        id="async-select-semester"
+                        sx={{ width: 220 }}
+                        defaultValue={semesters.find(sem => sem.id === Number(selectedSemesterId))
+                            ?? semesters.find(sem => sem.currentSemester)}
+                        open={openS}
+                        onOpen={() => setOpenS(true)}
+                        onClose={() => setOpenS(false)}
+                        onChange={(e, newValue) => setSelectedSemesterId(newValue ? newValue.id : undefined)}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                        getOptionLabel={(option) => (option.description ? option.description : '')}
+                        options={semesters}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Semesters"
+                                inputProps={{
+                                    ...params.inputProps,
+                                    endadornment: (
+                                        <>
+                                            {params.inputProps.endadornment}
+                                        </>
+                                    )
+                                }}
+                            />
+                        )}
                     />
-                </IsCurrentWeekContext.Provider>
-            </CanEditAttendanceContext.Provider>
-        </Container>
+
+                    <Autocomplete
+                        id="async-select-group"
+                        sx={{ width: 150 }}
+                        value={groups.find(group => group.name === selectedGroupName) || null}
+                        open={openG}
+                        onOpen={() => setOpenG(true)}
+                        onClose={() => setOpenG(false)}
+                        onChange={(e, newValue) => setSelectedGroupName(newValue ? newValue.name : '')}
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                        getOptionLabel={(option) => (option.name ? option.name : '')}
+                        options={groups}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Groups"
+                                inputProps={{
+                                    ...params.inputProps,
+                                    endadornment: (
+                                        <>
+                                            {params.inputProps.endadornment}
+                                        </>
+                                    )
+                                }}
+                            />
+                        )}
+                    />
+
+                </div>
+                <CanEditAttendanceContext.Provider value={canEditAttendance}>
+                    <IsCurrentWeekContext.Provider value={isCurrentWeekType}>
+                        <ScheduleTable
+                            semesterId={selectedSemesterId}
+                            weekType={weekType}
+                            selectedGroupId={selectedGroupName}
+                        />
+                    </IsCurrentWeekContext.Provider>
+                </CanEditAttendanceContext.Provider>
+            </Container>
+        </>
     )
 
     return (semesters.length || groups.length)

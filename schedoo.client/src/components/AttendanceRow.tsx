@@ -4,8 +4,6 @@ import axios from "../api/axios";
 import { AxiosResponse, isAxiosError } from "axios";
 import { getAttendanceByIdReq } from "../api/requests";
 
-
-
 export function AttendanceRow(props
     : {
         attendance: Attendance
@@ -19,7 +17,7 @@ export function AttendanceRow(props
 
     return (
         <tr>
-            <td>{props.attendance.studentName} {props.attendance.studentSurname} {props.attendance.studentPatronymic}</td>
+            <td>{props.attendance.studentFullName}</td>
             <td>
                 <select
                     title="Select attendance status"
@@ -35,7 +33,7 @@ export function AttendanceRow(props
 
     async function updateAttendanceStatus(statusToChange: AttendanceStatus) {
         try {
-            const response: AxiosResponse = await axios.put(getAttendanceByIdReq(attendance.id), statusToChange,
+            const response: AxiosResponse = await axios.put(getAttendanceByIdReq(props.attendance.id), statusToChange,
                 {
                     headers: { 'Content-Type': 'application/json' },
                     withCredentials: true

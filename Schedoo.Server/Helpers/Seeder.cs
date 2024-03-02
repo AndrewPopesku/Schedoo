@@ -103,6 +103,11 @@ public static class Seeder
                 {
                     UserId = "98020454-c731-45e3-980c-1d1cec0ba390",
                     RoleId = "2ee57d9c-7d76-419a-95b4-716c8acb3c52",
+                },
+                new()
+                {
+                    UserId = "6cc6af6a-edc3-4715-9b09-f7638543fe68",
+                    RoleId = "2ee57d9c-7d76-419a-95b4-716c8acb3c52",
                 }
             });
     }

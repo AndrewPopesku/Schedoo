@@ -10,7 +10,7 @@ import { getScheduleByGroupNameReq } from "../api/requests.ts";
 import { IsCurrentWeekContext } from "../pages/SchedulePage.tsx";
 
 export function ScheduleTable(props
-    : { 
+    : {
         semesterId: number, 
         weekType: WeekType, 
         isAttendanceAllowedToChange: boolean,
@@ -52,7 +52,7 @@ export function ScheduleTable(props
     function blinkingDotForCurrentDay(day: string) {
         return (
             <div className="active-day">
-                <FiberManualRecordIcon color="primary" className="blinking-dot"/>
+                <FiberManualRecordIcon color="secondary" className="blinking-dot"/>
                 {day}
             </div>
         )

@@ -18,6 +18,7 @@ export function Profile() {
             <p>{user?.surname}</p>
             <p>{user?.patronymic}</p>
             <p>{user?.phoneNumber ?? "no phone number"}</p>
+            <p>Attended classes: {user?.attendancesPresent}/{user?.attendancesTotal}</p>
         </>
     )
 

@@ -6,8 +6,7 @@ import { Attendance } from "../types/interfaces";
 import { CircularProgress } from "@mui/material";
 import { AttendanceRow } from "../components/AttendanceRow";
 import { useAuth } from "../hooks/useAuth";
-
-const ATD = 'attendance/get/scheduleDateId=';
+import '../styles/Attendance.css';
 
 export function AttendancePage() {
     const { scheduleDateId } = useParams();
@@ -25,7 +24,7 @@ export function AttendancePage() {
         <section>
             <h2>{className}</h2>
             <h4>{date?.toString()}</h4>
-            <table>
+            <table className="a-table">
                 <thead>
                     <tr>
                         <th>Student</th>

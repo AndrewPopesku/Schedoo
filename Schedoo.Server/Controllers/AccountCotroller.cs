@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Schedoo.Server.Data;
 using Schedoo.Server.Models;
 
 namespace Schedoo.Server.Controllers;
@@ -14,7 +15,9 @@ namespace Schedoo.Server.Controllers;
 public class AccountController(
     UserManager<User> userManager,
     RoleManager<IdentityRole> roleManager,
-    IConfiguration configuration) : ControllerBase
+    IConfiguration configuration,
+    SchedooContext schedooContext
+    ) : ControllerBase
 {
     [HttpPost]
     [Route("login")]
@@ -24,7 +27,7 @@ public class AccountController(
         if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
         {
             var userRoles = await userManager.GetRolesAsync(user);
-
+            
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.UserName),
@@ -41,7 +44,7 @@ public class AccountController(
             var token = new JwtSecurityToken(
                 issuer: configuration["JWT:ValidIssuer"],
                 audience: configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
+                expires: DateTime.Now.AddMonths(1),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
@@ -100,24 +103,40 @@ public class AccountController(
     {
         // Get user claims
         var user = await userManager.FindByNameAsync(User.Identity.Name);
-
-        // If we have no user...
+        
         if (user == null)
-            // Return error
             return NotFound(new
             {
                 // TODO: Localization
                 ErrorMessage = "User not found"
             });
 
-        // Return token to user
+        if (await userManager.IsInRoleAsync(user, "Student"))
+        {
+            var attendancesTotal = schedooContext.Attendances
+                .Where(a => a.StudentId == user.Id);
+            var attendancesPresent = attendancesTotal
+                .Where(a => a.AttendanceStatus == AttendanceStatus.Present);
+            
+            return Ok(new
+            {
+                name = user.Name,
+                surname = user.SurName,
+                patronymic = user.Patronymic,
+                email = user.Email,
+                username = user.UserName,
+                phoneNumber = user.PhoneNumber,
+                attendancesTotal = attendancesTotal.Count(),
+                attendancesPresent = attendancesPresent.Count()
+            });
+        }
         return Ok(new
         {
             name = user.Name,
             surname = user.SurName,
             patronymic = user.Patronymic,
             email = user.Email,
-            Username = user.UserName,
+            username = user.UserName,
             phoneNumber = user.PhoneNumber
         });
     }

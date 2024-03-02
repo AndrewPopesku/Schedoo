@@ -21,7 +21,7 @@ export function ScheduleCell(props
     }
 
     return (
-        <td className={props.isActive ? 'active-card' : ''} >
+        <td className={props.isActive ? 'active-card' : '' + ' td-schedule'} >
             {props.classData && 
                 <div className="class-card">
                     <div className="class-content">

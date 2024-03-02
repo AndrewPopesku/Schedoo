@@ -30,12 +30,12 @@
     margin: 0 0.7em;
 }
 
-table {
+.table {
     border-collapse: separate;
     border-spacing: 2em 1em;
 }
 
-td {
+.td-schedule {
     border: 1px solid var(--grey);
     border-radius: 5px;
     height: 7.5em;
@@ -132,7 +132,7 @@ strong {
 
 /* Small devices (tablets) */
 @media (min-width: 576px) and (max-width: 785px) {
-    table {
+    .table {
         border-spacing: 1em 0.5em;
         font-size: 0.8em;
     }
@@ -140,7 +140,7 @@ strong {
 
 /* Medium devices (desktops) */
 @media (min-width: 785px) and (max-width: 991.98px) {
-    table {
+    .table {
         border-spacing: 1.2em 0.7em;
         font-size: 0.9em;
     }
@@ -148,14 +148,14 @@ strong {
 
 /* Large devices (large desktops) */
 @media (min-width: 992px) and (max-width: 1199.98px) {
-    table {
+    .table {
         border-spacing: 1.5em 0.9em;
     }
 }
 
 /* Extra large devices (extra large desktops) */
 @media (min-width: 1200px) {
-    td {
+    .td-schedule {
         border: 1px solid var(--grey);
         border-radius: 5px;
         height: 7.5em;

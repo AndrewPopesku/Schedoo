@@ -22,6 +22,8 @@ export function useAuth() {
         const storedAuth = localStorage.getItem('auth');
         if (storedAuth) {
             setAuth(JSON.parse(storedAuth));
+        } else {
+            setAuth({});
         }
     }, []);
 
