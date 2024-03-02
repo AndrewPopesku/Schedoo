@@ -17,30 +17,35 @@ namespace Schedoo.Server.Controllers
         [HttpGet("get/scheduleDateId={scheduleDateId}")]
         public async Task<IActionResult> GetAttendances(int scheduleDateId)
         {
+            var user = await userManager.FindByNameAsync(User.Identity.Name);
+            var groupUser = await schedooContext.Groups.FindAsync(user.GroupId);
+            
             var (startWeekDay, endWeekDay) = Extensions.GetMondayAndFriday();
             var attendances = schedooContext.Attendances
                 .Where(a => a.ScheduleDate.Id == scheduleDateId)
                 .Include(a => a.ScheduleDate)
                     .ThenInclude(sd => sd.Schedule)
                         .ThenInclude(s => s.Class);
-            
-            // if (!attendances.Any(a => a.ScheduleDate.Date >= startWeekDay
-            //                           && a.ScheduleDate.Date <= endWeekDay))
-            // {
-            //     await UpdateAttendanceTable(scheduleDateId);
-            // }
 
-            var result = attendances.Select(a => new
+            var groupAttendance =
+                await schedooContext.Groups.FindAsync(attendances.FirstOrDefault().ScheduleDate.Schedule.GroupId);
+            if (groupUser.Name.Substring(0, 3) ==
+                groupAttendance.Name.Substring(0, 3))
             {
-                Id = a.Id,
-                AttendanceStatus = a.AttendanceStatus,
-                ClassName = a.ScheduleDate.Schedule.Class.Name,
-                ScheduleDateId = a.ScheduleDateId,
-                StudentFullName = a.StudentFullName,
-                Date = a.ScheduleDate.Date.ToString("dd/MM")
-            });
-            
-            return Ok(result);
+                var result = attendances.Select(a => new
+                {
+                    Id = a.Id,
+                    AttendanceStatus = a.AttendanceStatus,
+                    ClassName = a.ScheduleDate.Schedule.Class.Name,
+                    ScheduleDateId = a.ScheduleDateId,
+                    StudentFullName = a.StudentFullName,
+                    Date = a.ScheduleDate.Date.ToString("dd/MM")
+                });
+                
+                return Ok(result);
+            }
+
+            return Forbid();
         }
         
         [HttpPut("update/{id}")]

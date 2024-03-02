@@ -24,6 +24,11 @@ public class AccountController(
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
         var user = await userManager.FindByNameAsync(model.Username);
+        if (user is null)
+        {
+            user = await userManager.FindByEmailAsync(model.Username);
+        }
+        
         if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
         {
             var userRoles = await userManager.GetRolesAsync(user);
@@ -97,8 +102,8 @@ public class AccountController(
     }
     
     [HttpGet]
-    [Route("userprofile")]
     [Authorize]
+    [Route("userprofile")]
     public async Task<IActionResult> GetUserProfileAsync()
     {
         // Get user claims

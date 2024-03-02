@@ -37,7 +37,7 @@ namespace Schedoo.Server.Controllers
             var scheduleDatesDb = schedooContext.ScheduleDates
                 .Where(sd => sd.Date >= startWeekDate && sd.Date <= endWeekDate)
                 .Include(sd => sd.Schedule).ThenInclude(s => s.Group)
-                .Where(sd => sd.Schedule.Group.Name == groupName);
+                .Where(sd => sd.Schedule.Group.Name == groupName).ToList();
 
             if (!schedulesDb.Any())
             {

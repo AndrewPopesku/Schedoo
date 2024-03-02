@@ -3,6 +3,8 @@ import axios from '../../api/axios'
 import { useAuth } from "../../hooks/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Auth } from "../../types/interfaces";
+import { Label } from "@mui/icons-material";
+import { FormControl } from "@mui/material";
 
 const LOGIN_URL = "account/login";
 
@@ -75,7 +77,7 @@ export function Login() {
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
             <h1>Sign In</h1>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="email">Email:</label>
+                <label htmlFor="email">Email or username:</label>
                 <input
                     type="text"
                     id="email"
@@ -96,6 +98,7 @@ export function Login() {
                 />
                 <button>Sign In</button>
             </form>
+            
             <p>
                 Need an Account?<br />
                 <span className="line">

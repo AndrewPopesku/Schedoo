@@ -3,6 +3,8 @@ import { faCheck, faTimes, faInfoCircle } from "@fortawesome/free-solid-svg-icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from '../../api/axios';
 import '../../styles/Auth.css'
+import { Label } from "@mui/icons-material";
+import { FormControl } from "@mui/base";
 
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]{3,16}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -64,13 +66,13 @@ export function Register() {
         }
         try {
             const response = await axios.post(REGISTER_URL,
-                JSON.stringify({ 
+                JSON.stringify({
                     username: username,
-                    email: email, 
-                    password: pwd 
+                    email: email,
+                    password: pwd
                 }),
                 {
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json'
                     },
                     withCredentials: true

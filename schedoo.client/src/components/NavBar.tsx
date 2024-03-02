@@ -24,10 +24,10 @@ export function NavBar() {
     return (
         <>
             <AppBar position="static" color="info">
-                <Container maxWidth="xl">
+                <Container>
                     <Toolbar disableGutters>
                         <Typography
-                            variant="h6"
+                            variant="h5"
                             noWrap
                             component="a"
                             sx={{
@@ -35,60 +35,67 @@ export function NavBar() {
                                 display: { xs: 'none', md: 'flex' },
                                 fontFamily: 'monospace',
                                 fontWeight: 700,
-                                letterSpacing: '.3rem',
+                                letterSpacing: '.2rem',
                                 color: 'inherit',
                                 textDecoration: 'none',
                             }}
                         >
-                            LOGO
+                            Schedoo
                         </Typography>
 
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                             
                         </Box>
-
                         {auth?.email ?
-                            <Box sx={{ flexGrow: 0 }}>
-                                <Tooltip title="Open settings">
-                                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                        <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-                                    </IconButton>
-                                </Tooltip>
-                                <Menu
-                                    sx={{ mt: '45px' }}
-                                    id="menu-appbar"
-                                    anchorEl={anchorElUser}
-                                    anchorOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
+                            <>
+                                <Typography
+                                    sx={{
+                                        color: 'inherit',
+                                        marginRight: 3
                                     }}
-                                    keepMounted
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
-                                    open={Boolean(anchorElUser)}
-                                    onClose={handleCloseUserMenu}
                                 >
-                                    <MenuItem onClick={handleCloseUserMenu}>
-                                        <Typography 
-                                            textAlign="center"
+                                    {auth.email}
+                                </Typography>
+                                <Box sx={{ flexGrow: 0 }}>
+                                    <Tooltip title="Open settings">
+                                        <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                                            <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Menu
+                                        sx={{ mt: '45px' }}
+                                        id="menu-appbar"
+                                        anchorEl={anchorElUser}
+                                        anchorOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'right',
+                                        }}
+                                        keepMounted
+                                        transformOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'right',
+                                        }}
+                                        open={Boolean(anchorElUser)}
+                                        onClose={handleCloseUserMenu}
+                                    >
+                                        <MenuItem
                                             onClick={() => navigateTo("/profile")}
                                         >
-                                            Profile
-                                        </Typography>
-                                    </MenuItem>
+                                            <Typography textAlign="center">
+                                                Profile
+                                            </Typography>
+                                        </MenuItem>
 
-                                    <MenuItem onClick={handleCloseUserMenu}>
-                                        <Typography 
-                                            textAlign="center"
+                                        <MenuItem
                                             onClick={() => setAuth({})}
                                         >
-                                            Sign Out
-                                        </Typography>
-                                    </MenuItem>
-                                </Menu>
-                            </Box>
+                                            <Typography textAlign="center">
+                                                Sign Out
+                                            </Typography>
+                                        </MenuItem>
+                                    </Menu>
+                                </Box>
+                            </>
                             :
                             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                                 <Button

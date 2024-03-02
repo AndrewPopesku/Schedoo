@@ -40,8 +40,8 @@ export function ScheduleCell(props
                             </div>
                             { isCurrentWeekType && canEditAttendance &&
                                 <div>
-                                    <button
-                                        onClick={handleClick}></button>
+                                    <button onClick={handleClick}>
+                                    </button>
                                 </div>
                             }
                         </div>

@@ -15,8 +15,8 @@ public static class Extensions
             daysToMonday -= 7;
         }
 
-        DateTime mondayOfWeek = today.AddDays(daysToMonday);
-        DateTime fridayOfWeek = mondayOfWeek.AddDays(4);
+        DateTime mondayOfWeek = today.AddDays(daysToMonday).Date;
+        DateTime fridayOfWeek = mondayOfWeek.AddDays(4).Date;
 
         return (mondayOfWeek, fridayOfWeek);
     }
@@ -42,7 +42,7 @@ public static class Extensions
         int daysUntilTarget = (int)dayOfWeek - (int)today.DayOfWeek;
 
         // If today is the target day, return today; otherwise, return the next occurrence.
-        return today.AddDays(daysUntilTarget);
+        return today.AddDays(daysUntilTarget).Date;
     }
 
     public static WeekType ToWeekType(this string weekTypeStr)

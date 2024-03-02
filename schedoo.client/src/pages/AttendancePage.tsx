@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "../api/axios";
 import { AxiosResponse, isAxiosError } from "axios";
 import { Attendance } from "../types/interfaces";
@@ -12,6 +12,9 @@ export function AttendancePage() {
     const { scheduleDateId } = useParams();
     const {auth} = useAuth();
     const [attendances, setAttendances] = useState<Attendance[]>();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/";
 
     useEffect(() => {
         populateAttendanceData();
@@ -41,7 +44,7 @@ export function AttendancePage() {
 
     return attendances
         ? content
-        : <CircularProgress />;
+        : <CircularProgress/>;
 
     async function populateAttendanceData() {
         try {
@@ -59,7 +62,9 @@ export function AttendancePage() {
             setAttendances(responseData);
         } catch (err: any) {
             if (isAxiosError(err)) {
-                // Handle Axios-specific errors
+                if (err.status) {
+                    navigate("/unauthorized")
+                }
                 console.error("Axios error:", err.message);
             } else {
                 // Handle general errors
